@@ -438,9 +438,9 @@
     </div>
 
     <script>
-       // ========== CONFIGURATION ==========
-const SCRIPT_URL = "YOUR_GOOGLE_WEB_APP_URL_HERE"; 
+const SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
 
+// Elements
 const fileInput = document.getElementById('pdfFile');
 const fileUploadWrapper = document.getElementById('fileUploadWrapper');
 const fileNameDisplay = document.getElementById('fileNameDisplay');
@@ -450,29 +450,38 @@ const uploadProgress = document.getElementById('uploadProgress');
 const progressFill = document.getElementById('progressFill');
 const submitBtn = document.getElementById('submitBtn');
 
-// 1. Load PDFs with ID support for Deletion
+// ========== 1. STATISTICS & DATA LOADING ==========
 async function loadPDFs() {
     try {
         const response = await fetch(SCRIPT_URL);
         const data = await response.json();
         const tbody = document.getElementById('pdf-table-body');
         
+        // Update Stat Bar
+        let totalViews = 0;
+        let totalPrints = 0;
+        data.forEach(item => {
+            totalViews += parseInt(item.views || 0);
+            totalPrints += parseInt(item.prints || 0);
+        });
+
         document.getElementById('total-pdfs').textContent = data.length;
+        document.getElementById('total-views').textContent = totalViews;
+        document.getElementById('total-prints').textContent = totalPrints;
 
         if (data.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No PDFs added yet</td></tr>';
             return;
         }
 
-        // We use item.id (sent from Google Script) to identify rows
         tbody.innerHTML = data.map((item) => `
             <tr>
                 <td><strong>${item.title}</strong></td>
                 <td>${item.subject || '-'}</td>
                 <td>${item.class || '-'}</td>
                 <td>-</td>
-                <td>0</td>
-                <td>0</td>
+                <td>${item.views}</td>
+                <td>${item.prints}</td>
                 <td><span style="color: #28a745">✓ Active</span></td>
                 <td>
                     <button class="btn-small btn-success" onclick="window.open('${item.url}', '_blank')">View</button>
@@ -485,124 +494,95 @@ async function loadPDFs() {
     }
 }
 
-// 2. Add PDF Functionality
-document.getElementById('pdf-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    if (!fileInput.files[0]) {
-        showMessage('❌ Please select a PDF file', 'error');
-        return;
-    }
-
-    const payload = {
-        action: 'add', // Tells Google Script to add a row
-        title: document.getElementById('title').value,
-        subject: document.getElementById('subject').value,
-        class: document.getElementById('class').value,
-        url: "PASTE_LINK_MANUALLY_OR_USE_DRIVE_API" 
-    };
-
-    uploadProgress.classList.add('show');
-    submitBtn.disabled = true;
-    submitBtn.textContent = '⏳ Saving to Sheet...';
-
-    try {
-        await fetch(SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-        
-        showMessage('✅ PDF Info Saved to Google Sheet!', 'success');
-        document.getElementById('pdf-form').reset();
-        fileNameDisplay.classList.remove('show');
-        loadPDFs();
-    } catch (error) {
-        showMessage('❌ Error saving to database', 'error');
-    } finally {
-        uploadProgress.classList.remove('show');
-        submitBtn.disabled = false;
-        submitBtn.textContent = '📤 Upload PDF to Library';
-    }
-});
-
-// 3. NEW: Delete Functionality
+// ========== 2. DELETE FUNCTIONALITY ==========
 async function deletePDF(rowId) {
     if (!confirm('Are you sure you want to delete this PDF?')) return;
-
     try {
         await fetch(SCRIPT_URL, {
             method: "POST",
             body: JSON.stringify({ action: 'delete', id: rowId })
         });
-        
-        showMessage('🗑️ PDF removed from database!', 'success');
+        showMessage('🗑️ Removed successfully', 'success');
         loadPDFs();
-    } catch (error) {
-        showMessage('❌ Error deleting PDF', 'error');
-    }
+    } catch (e) { showMessage('❌ Delete failed', 'error'); }
 }
 
-// 4. File Selection & Drag/Drop Logic (Your original functionality)
+// ========== 3. DRAG & DROP + FILE SELECTION ==========
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + ['Bytes', 'KB', 'MB', 'GB'][i];
 }
 
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
-    if (file) {
-        if (file.type !== 'application/pdf') {
-            showMessage('❌ Please select a PDF file only', 'error');
-            fileInput.value = '';
-            return;
-        }
-        if (file.size > 50 * 1024 * 1024) {
-            showMessage('❌ File size must be less than 50MB', 'error');
-            fileInput.value = '';
-            return;
-        }
+    if (file && file.type === 'application/pdf') {
         selectedFileName.textContent = file.name;
         selectedFileSize.textContent = formatFileSize(file.size);
         fileNameDisplay.classList.add('show');
+    } else {
+        showMessage('❌ Please select a valid PDF', 'error');
     }
 });
 
-fileUploadWrapper.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    fileUploadWrapper.classList.add('dragover');
-});
-
+fileUploadWrapper.addEventListener('dragover', (e) => { e.preventDefault(); fileUploadWrapper.classList.add('dragover'); });
 fileUploadWrapper.addEventListener('dragleave', () => fileUploadWrapper.classList.remove('dragover'));
-
 fileUploadWrapper.addEventListener('drop', (e) => {
     e.preventDefault();
     fileUploadWrapper.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        fileInput.files = files;
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
         fileInput.dispatchEvent(new Event('change'));
     }
 });
 
-// 5. Security & UI Helpers
-window.addEventListener('blur', () => {
-    document.body.style.filter = "blur(15px)";
-    document.body.style.transition = "filter 0.3s ease";
+// ========== 4. UPLOAD TO DRIVE & SHEET ==========
+document.getElementById('pdf-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = fileInput.files[0];
+    if (!file) return showMessage('❌ No file selected', 'error');
+
+    uploadProgress.classList.add('show');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '⏳ Uploading to Drive...';
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+        const payload = {
+            action: 'add',
+            title: document.getElementById('title').value,
+            subject: document.getElementById('subject').value,
+            class: document.getElementById('class').value,
+            fileName: file.name,
+            fileData: reader.result.split(',')[1]
+        };
+
+        try {
+            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+            showMessage('✅ Success!', 'success');
+            document.getElementById('pdf-form').reset();
+            fileNameDisplay.classList.remove('show');
+            loadPDFs();
+        } catch (err) { showMessage('❌ Upload failed', 'error'); }
+        finally {
+            uploadProgress.classList.remove('show');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '📤 Upload PDF to Library';
+        }
+    };
 });
 
-window.addEventListener('focus', () => {
-    document.body.style.filter = "blur(0px)";
-});
+// ========== 5. SECURITY & UI ==========
+window.addEventListener('blur', () => { document.body.style.filter = "blur(15px)"; });
+window.addEventListener('focus', () => { document.body.style.filter = "blur(0px)"; });
 
 function showMessage(text, type) {
-    const messageDiv = document.getElementById('message');
-    messageDiv.textContent = text;
-    messageDiv.className = 'message ' + type;
-    messageDiv.style.display = 'block';
-    setTimeout(() => { messageDiv.style.display = 'none'; }, 5000);
+    const msg = document.getElementById('message');
+    msg.textContent = text;
+    msg.className = 'message ' + type;
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 5000);
 }
 
 loadPDFs();
