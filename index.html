@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible College - PDF Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* The Blur Protection */
+        .secure-blur {
+            filter: blur(20px);
+            transition: filter 0.3s ease;
+            user-select: none;
+        }
+        @media print {
+            body { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-blue-600 text-white p-6 rounded-t-lg shadow-lg">
+        <h1 class="text-2xl font-bold">🛡️ Bible College - PDF Management</h1>
+        <p class="text-sm opacity-80">Admin Panel for Managing Student Study Materials</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white p-6 shadow-md rounded-b-lg">
+        
+        <section class="mb-10">
+            <h2 class="text-xl font-semibold mb-4 text-blue-800 border-b pb-2">+ Add New PDF to Library</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input id="pdfTitle" type="text" placeholder="Title (e.g. Genesis Study)" class="border p-2 rounded">
+                <input id="pdfSubject" type="text" placeholder="Subject" class="border p-2 rounded">
+                <input id="pdfUrl" type="text" placeholder="Google Drive Direct URL" class="border p-2 rounded col-span-2">
+                <button onclick="addPdf()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">
+                    Add PDF to Library
+                </button>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">📚 Current PDF Library</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="p-3 border-b">Title</th>
+                            <th class="p-3 border-b">Subject</th>
+                            <th class="p-3 border-b">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pdfTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div id="viewerModal" class="fixed inset-0 bg-black bg-opacity-90 hidden flex-col items-center justify-center p-4 z-50">
+        <div class="w-full max-w-4xl bg-white rounded-lg overflow-hidden">
+            <div class="p-2 bg-gray-800 text-white flex justify-between items-center">
+                <span>Secure Viewer (Anti-Screenshot Active)</span>
+                <button onclick="closeViewer()" class="text-red-500 font-bold px-4">CLOSE [X]</button>
+            </div>
+            <div id="pdfWrapper" class="h-[80vh] w-full">
+                <iframe id="secureIframe" src="" class="w-full h-full border-none"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fake Database (In a real app, this would be fetched from GitHub/Google Sheets)
+        let pdfDatabase = [
+            { title: "Old Testament History", subject: "Biblical Studies", url: "#" },
+            { title: "Christian Theology Basics", subject: "Theology", url: "#" }
+        ];
+
+        function renderTable() {
+            const tbody = document.getElementById('pdfTableBody');
+            tbody.innerHTML = '';
+            pdfDatabase.forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 border-b font-medium">${item.title}</td>
+                        <td class="p-3 border-b text-gray-600">${item.subject}</td>
+                        <td class="p-3 border-b">
+                            <button onclick="openViewer('${item.url}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm">View</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openViewer(url) {
+            const modal = document.getElementById('viewerModal');
+            const iframe = document.getElementById('secureIframe');
+            iframe.src = url;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeViewer() {
+            const modal = document.getElementById('viewerModal');
+            document.getElementById('secureIframe').src = "";
+            modal.classList.add('hidden');
+        }
+
+        // ANDROID PROTECTION: Blur on Focus Loss
+        window.addEventListener('blur', () => {
+            document.getElementById('pdfWrapper').classList.add('secure-blur');
+        });
+
+        window.addEventListener('focus', () => {
+            document.getElementById('pdfWrapper').classList.remove('secure-blur');
+        });
+
+        // Initialize
+        renderTable();
+    </script>
+</body>
+</html>
