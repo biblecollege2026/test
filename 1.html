@@ -167,7 +167,7 @@ window.hideAllContentSections = function() {
 };
 
 function openPDF(index) {
-    currentActiveIndex = index; 
+    currentActiveIndex = index;
     const item = PDF_DATA[index];
     if (!item || !item.url) return;
 
@@ -175,27 +175,34 @@ function openPDF(index) {
     document.getElementById('pdfViewer').style.display = 'block';
     document.getElementById('currentPdfTitle').textContent = item.title;
 
-    // Get the ID
+    // 1. Extract File ID correctly from any Drive link
     let fileId = "";
-    if (item.url.includes('id=')) {
-        fileId = item.url.split('id=')[1].split('&')[0];
-    } else if (item.url.includes('file/d/')) {
-        fileId = item.url.split('file/d/')[1].split('/')[0];
+    try {
+        if (item.url.includes('id=')) {
+            fileId = item.url.split('id=')[1].split('&')[0];
+        } else if (item.url.includes('file/d/')) {
+            fileId = item.url.split('file/d/')[1].split('/')[0];
+        }
+    } catch (e) {
+        console.error("Invalid URL format");
     }
 
-    // WE CHANGE THIS URL: Using 'preview' is better than 'uc' for bypass
+    // 2. USE THE OFFICIAL PREVIEW LINK
+    // This specific format (/preview) is the most compatible for iframes
     const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
 
+    // 3. Update the Iframe in the viewer
     const viewerContainer = document.querySelector('.canvas-wrapper');
     if (viewerContainer) {
-        // We add "sandbox" to stop those pesky OGS and storage errors
+        // We add 'allow="autoplay"' which helps with some Google Drive loading triggers
         viewerContainer.innerHTML = `
-            <iframe src="${embedUrl}" 
-                    width="100%" 
-                    height="800px" 
-                    style="border: 3px solid #1e3c72; border-radius: 12px;"
-                    allow="autoplay"
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups">
+            <iframe 
+                src="${embedUrl}" 
+                width="100%" 
+                height="800px" 
+                style="border: 4px solid #1e3c72; border-radius: 12px; background: white;" 
+                allow="autoplay"
+                loading="lazy">
             </iframe>`;
     }
 }
