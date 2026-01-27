@@ -539,33 +539,53 @@ fileUploadWrapper.addEventListener('drop', (e) => {
 // ========== 4. UPLOAD TO DRIVE & SHEET ==========
 document.getElementById('pdf-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
     const file = fileInput.files[0];
-    if (!file) return showMessage('❌ No file selected', 'error');
+    if (!file) {
+        showMessage('❌ Please select a PDF file', 'error');
+        return;
+    }
 
+    // Start UI Loading State
     uploadProgress.classList.add('show');
     submitBtn.disabled = true;
     submitBtn.textContent = '⏳ Uploading to Drive...';
 
+    // 1. Convert PDF to Base64 (Required to send files to Google Script)
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async () => {
+        const base64Data = reader.result.split(',')[1];
+        
+        // 2. Prepare the payload to match the new Google Script logic
         const payload = {
-            action: 'add',
+            action: 'add', // Tells the script to run the "add" logic
             title: document.getElementById('title').value,
             subject: document.getElementById('subject').value,
             class: document.getElementById('class').value,
-            fileName: file.name,
-            fileData: reader.result.split(',')[1]
+            fileName: file.name, // Sends the name to Google Drive
+            fileData: base64Data  // Sends the actual PDF content
         };
 
         try {
-            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-            showMessage('✅ Success!', 'success');
-            document.getElementById('pdf-form').reset();
-            fileNameDisplay.classList.remove('show');
-            loadPDFs();
-        } catch (err) { showMessage('❌ Upload failed', 'error'); }
-        finally {
+            const response = await fetch(SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.text();
+            
+            if (result === "Success") {
+                showMessage('✅ Uploaded to Google Drive & Sheet!', 'success');
+                document.getElementById('pdf-form').reset();
+                fileNameDisplay.classList.remove('show');
+                loadPDFs(); // Refresh table
+            } else {
+                showMessage('❌ ' + result, 'error');
+            }
+        } catch (error) {
+            showMessage('❌ Error connecting to server', 'error');
+        } finally {
             uploadProgress.classList.remove('show');
             submitBtn.disabled = false;
             submitBtn.textContent = '📤 Upload PDF to Library';
