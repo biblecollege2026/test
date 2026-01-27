@@ -3,119 +3,681 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bible College - PDF Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Admin - Bible College PDF Management</title>
     <style>
-        /* The Blur Protection */
-        .secure-blur {
-            filter: blur(20px);
-            transition: filter 0.3s ease;
-            user-select: none;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        @media print {
-            body { display: none !important; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1e40af;
+        }
+
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1e40af;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 64, 175, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .pdf-list {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .pdf-list h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* NEW: File upload styling */
+        .file-upload-wrapper {
+            position: relative;
+            border: 2px dashed #1e40af;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #f8faff;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .file-upload-wrapper:hover {
+            background: #e7f3ff;
+            border-color: #3b82f6;
+        }
+
+        .file-upload-wrapper.dragover {
+            background: #dbeafe;
+            border-color: #2563eb;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-content {
+            pointer-events: none;
+        }
+
+        .file-upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .file-name-display {
+            margin-top: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .file-name-display.show {
+            display: block;
+        }
+
+        .file-name-display strong {
+            color: #1e40af;
+        }
+
+        .upload-progress {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .upload-progress.show {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .upload-hint {
+            background: #e7f3ff;
+            border-left: 4px solid #1e40af;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .upload-hint h4 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .upload-hint ul li {
+            margin-bottom: 5px;
         }
     </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-8">
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Bible College - PDF Management</h1>
+            <p>Admin Panel for Managing Student Study Materials</p>
+        </div>
 
-    <div class="max-w-4xl mx-auto bg-blue-600 text-white p-6 rounded-t-lg shadow-lg">
-        <h1 class="text-2xl font-bold">🛡️ Bible College - PDF Management</h1>
-        <p class="text-sm opacity-80">Admin Panel for Managing Student Study Materials</p>
-    </div>
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <h3>Total PDFs</h3>
+                <div class="number" id="total-pdfs">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Views</h3>
+                <div class="number" id="total-views">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Prints</h3>
+                <div class="number" id="total-prints">0</div>
+            </div>
+        </div>
 
-    <div class="max-w-4xl mx-auto bg-white p-6 shadow-md rounded-b-lg">
-        
-        <section class="mb-10">
-            <h2 class="text-xl font-semibold mb-4 text-blue-800 border-b pb-2">+ Add New PDF to Library</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input id="pdfTitle" type="text" placeholder="Title (e.g. Genesis Study)" class="border p-2 rounded">
-                <input id="pdfSubject" type="text" placeholder="Subject" class="border p-2 rounded">
-                <input id="pdfUrl" type="text" placeholder="Google Drive Direct URL" class="border p-2 rounded col-span-2">
-                <button onclick="addPdf()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">
-                    Add PDF to Library
+        <div class="form-section">
+            <h2>➕ Upload New PDF to Library</h2>
+            <div id="message" class="message"></div>
+            
+            <form id="pdf-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title *</label>
+                    <input type="text" id="title" required placeholder="e.g., Genesis Study Guide">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" placeholder="Brief description of the PDF content for students"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" placeholder="e.g., Old Testament">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="class">Class/Course</label>
+                        <input type="text" id="class" placeholder="e.g., Pastors Foundation Course">
+                    </div>
+                </div>
+
+                <!-- NEW: File Upload Section -->
+                <div class="form-group">
+                    <label>Select PDF File *</label>
+                    <div class="file-upload-wrapper" id="fileUploadWrapper">
+                        <input type="file" id="pdfFile" accept=".pdf" required>
+                        <div class="file-upload-content">
+                            <div class="file-upload-icon">📄</div>
+                            <h3>Click to select PDF or drag and drop</h3>
+                            <p style="color: #666; margin-top: 10px;">Maximum file size: 50MB</p>
+                        </div>
+                    </div>
+                    <div class="file-name-display" id="fileNameDisplay">
+                        <strong>Selected file:</strong> <span id="selectedFileName"></span>
+                        <br>
+                        <small><strong>Size:</strong> <span id="selectedFileSize"></span></small>
+                    </div>
+
+                    <div class="upload-hint">
+                        <h4>✨ Benefits of Direct Upload:</h4>
+                        <ul>
+                            <li>✅ No need for external hosting (Google Drive, Dropbox, etc.)</li>
+                            <li>✅ PDFs stored securely on your server</li>
+                            <li>✅ Faster loading for students</li>
+                            <li>✅ No broken links!</li>
+                            <li>⚠️ Max file size: 50MB per PDF</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="upload-progress" id="uploadProgress">
+                    <strong>Uploading...</strong>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill">0%</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    📤 Upload PDF to Library
                 </button>
-            </div>
-        </section>
+            </form>
+        </div>
 
-        <section>
-            <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">📚 Current PDF Library</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="p-3 border-b">Title</th>
-                            <th class="p-3 border-b">Subject</th>
-                            <th class="p-3 border-b">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pdfTableBody">
-                        </tbody>
-                </table>
-            </div>
-        </section>
-    </div>
-
-    <div id="viewerModal" class="fixed inset-0 bg-black bg-opacity-90 hidden flex-col items-center justify-center p-4 z-50">
-        <div class="w-full max-w-4xl bg-white rounded-lg overflow-hidden">
-            <div class="p-2 bg-gray-800 text-white flex justify-between items-center">
-                <span>Secure Viewer (Anti-Screenshot Active)</span>
-                <button onclick="closeViewer()" class="text-red-500 font-bold px-4">CLOSE [X]</button>
-            </div>
-            <div id="pdfWrapper" class="h-[80vh] w-full">
-                <iframe id="secureIframe" src="" class="w-full h-full border-none"></iframe>
-            </div>
+        <div class="pdf-list">
+            <h2>📚 Current PDF Library</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Subject</th>
+                        <th>Course</th>
+                        <th>Size</th>
+                        <th>Views</th>
+                        <th>Prints</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-table-body">
+                    <tr>
+                        <td colspan="8" style="text-align: center;">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        // Fake Database (In a real app, this would be fetched from GitHub/Google Sheets)
-        let pdfDatabase = [
-            { title: "Old Testament History", subject: "Biblical Studies", url: "#" },
-            { title: "Christian Theology Basics", subject: "Theology", url: "#" }
-        ];
+        // ========== CONFIGURATION ==========
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000/api/library'
+            : '/api/library';
 
-        function renderTable() {
-            const tbody = document.getElementById('pdfTableBody');
-            tbody.innerHTML = '';
-            pdfDatabase.forEach((item, index) => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-3 border-b font-medium">${item.title}</td>
-                        <td class="p-3 border-b text-gray-600">${item.subject}</td>
-                        <td class="p-3 border-b">
-                            <button onclick="openViewer('${item.url}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm">View</button>
+        // File upload elements
+        const fileInput = document.getElementById('pdfFile');
+        const fileUploadWrapper = document.getElementById('fileUploadWrapper');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const selectedFileSize = document.getElementById('selectedFileSize');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressFill = document.getElementById('progressFill');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.type !== 'application/pdf') {
+                    showMessage('❌ Please select a PDF file only', 'error');
+                    fileInput.value = '';
+                    return;
+                }
+
+                if (file.size > 50 * 1024 * 1024) { // 50MB
+                    showMessage('❌ File size must be less than 50MB', 'error');
+                    fileInput.value = '';
+                    return;
+                }
+
+                selectedFileName.textContent = file.name;
+                selectedFileSize.textContent = formatFileSize(file.size);
+                fileNameDisplay.classList.add('show');
+            }
+        });
+
+        // Drag and drop functionality
+        fileUploadWrapper.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadWrapper.classList.add('dragover');
+        });
+
+        fileUploadWrapper.addEventListener('dragleave', () => {
+            fileUploadWrapper.classList.remove('dragover');
+        });
+
+        fileUploadWrapper.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadWrapper.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Load statistics
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/admin/stats`);
+                const stats = await response.json();
+                
+                document.getElementById('total-pdfs').textContent = stats.totalPDFs;
+                document.getElementById('total-views').textContent = stats.totalViews;
+                document.getElementById('total-prints').textContent = stats.totalPrints;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load PDF list
+        async function loadPDFs() {
+            try {
+                const response = await fetch(`${API_URL}/admin/pdfs`);
+                const pdfs = await response.json();
+                
+                const tbody = document.getElementById('pdf-table-body');
+                
+                if (pdfs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No PDFs added yet</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = pdfs.map(pdf => `
+                    <tr>
+                        <td><strong>${pdf.title}</strong></td>
+                        <td>${pdf.subject || '-'}</td>
+                        <td>${pdf.class || '-'}</td>
+                        <td>${pdf.fileSize ? formatFileSize(pdf.fileSize) : '-'}</td>
+                        <td>${pdf.viewCount}</td>
+                        <td>${pdf.printCount}</td>
+                        <td>
+                            <span style="color: ${pdf.isActive ? '#28a745' : '#dc3545'}">
+                                ${pdf.isActive ? '✓ Active' : '✗ Inactive'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-small btn-success" onclick="viewPDF('${pdf.fileUrl}')">View</button>
+                            <button class="btn-small btn-danger" onclick="deletePDF('${pdf._id}')">Delete</button>
                         </td>
                     </tr>
-                `;
-            });
+                `).join('');
+            } catch (error) {
+                console.error('Error loading PDFs:', error);
+            }
         }
 
-        function openViewer(url) {
-            const modal = document.getElementById('viewerModal');
-            const iframe = document.getElementById('secureIframe');
-            iframe.src = url;
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
+        // Upload PDF with progress
+        document.getElementById('pdf-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const file = fileInput.files[0];
+            if (!file) {
+                showMessage('❌ Please select a PDF file', 'error');
+                return;
+            }
 
-        function closeViewer() {
-            const modal = document.getElementById('viewerModal');
-            document.getElementById('secureIframe').src = "";
-            modal.classList.add('hidden');
-        }
+            // Create FormData
+            const formData = new FormData();
+            formData.append('pdfFile', file);
+            formData.append('title', document.getElementById('title').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('subject', document.getElementById('subject').value);
+            formData.append('class', document.getElementById('class').value);
 
-        // ANDROID PROTECTION: Blur on Focus Loss
-        window.addEventListener('blur', () => {
-            document.getElementById('pdfWrapper').classList.add('secure-blur');
+            // Show progress bar
+            uploadProgress.classList.add('show');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Uploading...';
+
+            try {
+                const xhr = new XMLHttpRequest();
+
+                // Track upload progress
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        progressFill.style.width = percentComplete + '%';
+                        progressFill.textContent = percentComplete + '%';
+                    }
+                });
+
+                // Handle completion
+                xhr.addEventListener('load', () => {
+                    uploadProgress.classList.remove('show');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '📤 Upload PDF to Library';
+
+                    if (xhr.status === 201) {
+                        showMessage('✅ PDF uploaded successfully!', 'success');
+                        document.getElementById('pdf-form').reset();
+                        fileNameDisplay.classList.remove('show');
+                        progressFill.style.width = '0%';
+                        progressFill.textContent = '0%';
+                        loadPDFs();
+                        loadStats();
+                    } else {
+                        const error = JSON.parse(xhr.responseText);
+                        showMessage('❌ Error: ' + error.message, 'error');
+                    }
+                });
+
+                // Handle errors
+                xhr.addEventListener('error', () => {
+                    uploadProgress.classList.remove('show');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '📤 Upload PDF to Library';
+                    showMessage('❌ Upload failed. Please try again.', 'error');
+                });
+
+                // Send request
+                xhr.open('POST', `${API_URL}/admin/upload`);
+                xhr.send(formData);
+
+            } catch (error) {
+                uploadProgress.classList.remove('show');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📤 Upload PDF to Library';
+                showMessage('❌ Error uploading PDF: ' + error.message, 'error');
+            }
         });
 
-        window.addEventListener('focus', () => {
-            document.getElementById('pdfWrapper').classList.remove('secure-blur');
-        });
+        // Delete PDF
+        async function deletePDF(id) {
+            if (!confirm('Are you sure you want to delete this PDF from the library?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/pdfs/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('✅ PDF deleted successfully!', 'success');
+                    loadPDFs();
+                    loadStats();
+                } else {
+                    showMessage('❌ Error deleting PDF', 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // View PDF
+        function viewPDF(url) {
+            window.open(url, '_blank');
+        }
+
+        // Show message
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
 
         // Initialize
-        renderTable();
+        loadStats();
+        loadPDFs();
+
+        // Refresh data every 30 seconds
+        setInterval(() => {
+            loadStats();
+            loadPDFs();
+        }, 30000);
     </script>
 </body>
 </html>
