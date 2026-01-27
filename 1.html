@@ -166,47 +166,32 @@ window.hideAllContentSections = function() {
     });
 };
 
-// 2. Updated openPDF to use the iFrame (no CORS errors)
 function openPDF(index) {
     const item = PDF_DATA[index];
-    if (!item || !item.url) {
-        alert("Error: PDF link not found.");
-        return;
-    }
+    if (!item || !item.url) return;
 
-    // Call the helper function
     window.hideAllContentSections();
+    document.getElementById('pdfViewer').style.display = 'block';
+    document.getElementById('currentPdfTitle').textContent = item.title;
 
-    // Show the viewer
-    const viewerSection = document.getElementById('pdfViewer');
-    if (viewerSection) viewerSection.style.display = 'block';
-
-    const titleEl = document.getElementById('currentPdfTitle');
-    if (titleEl) titleEl.textContent = item.title;
-
-    // Extract File ID for Google Viewer
+    // Extract the ID
     let fileId = "";
-    try {
-        if (item.url.includes('id=')) {
-            fileId = item.url.split('id=')[1].split('&')[0];
-        } else if (item.url.includes('file/d/')) {
-            fileId = item.url.split('file/d/')[1].split('/')[0];
-        }
-    } catch (e) {
-        console.error("URL Parsing error", e);
+    if (item.url.includes('id=')) {
+        fileId = item.url.split('id=')[1].split('&')[0];
+    } else if (item.url.includes('file/d/')) {
+        fileId = item.url.split('file/d/')[1].split('/')[0];
     }
 
-    const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+    // This URL is much cleaner and bypasses many Google account errors
+    const directUrl = `https://drive.google.com/file/d/${fileId}/preview`;
 
-    // 3. Inject the iFrame into the wrapper
-    // Make sure your 1.html has a div with class="canvas-wrapper"
     const viewerContainer = document.querySelector('.canvas-wrapper');
     if (viewerContainer) {
         viewerContainer.innerHTML = `
-            <iframe src="${embedUrl}" 
+            <iframe src="${directUrl}" 
                     width="100%" 
                     height="800px" 
-                    style="border: 3px solid #1e3c72; border-radius: 10px;" 
+                    style="border: 2px solid #1e3c72; border-radius: 8px;" 
                     allow="autoplay">
             </iframe>`;
     }
