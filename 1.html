@@ -166,7 +166,7 @@ window.hideAllContentSections = function() {
     });
 };
 
-function openPDF(index) {
+        function openPDF(index) {
     currentActiveIndex = index;
     const item = PDF_DATA[index];
     if (!item || !item.url) return;
@@ -175,38 +175,40 @@ function openPDF(index) {
     document.getElementById('pdfViewer').style.display = 'block';
     document.getElementById('currentPdfTitle').textContent = item.title;
 
-    // 1. Extract File ID correctly from any Drive link
+    // 1. Extract File ID
     let fileId = "";
-    try {
-        if (item.url.includes('id=')) {
-            fileId = item.url.split('id=')[1].split('&')[0];
-        } else if (item.url.includes('file/d/')) {
-            fileId = item.url.split('file/d/')[1].split('/')[0];
-        }
-    } catch (e) {
-        console.error("Invalid URL format");
+    if (item.url.includes('id=')) {
+        fileId = item.url.split('id=')[1].split('&')[0];
+    } else if (item.url.includes('file/d/')) {
+        fileId = item.url.split('file/d/')[1].split('/')[0];
     }
 
-    // 2. USE THE OFFICIAL PREVIEW LINK
-    // This specific format (/preview) is the most compatible for iframes
+    // 2. Format the URL for the Google Viewer
     const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
 
-    // 3. Update the Iframe in the viewer
+    // 3. Use an OBJECT tag (Best for strict in-page viewing)
     const viewerContainer = document.querySelector('.canvas-wrapper');
     if (viewerContainer) {
-        // We add 'allow="autoplay"' which helps with some Google Drive loading triggers
         viewerContainer.innerHTML = `
-            <iframe 
-                src="${embedUrl}" 
+            <object 
+                data="${embedUrl}" 
+                type="text/html" 
                 width="100%" 
                 height="800px" 
-                style="border: 4px solid #1e3c72; border-radius: 12px; background: white;" 
-                allow="autoplay"
-                loading="lazy">
-            </iframe>`;
+                style="border: 3px solid #1e3c72; border-radius: 12px; background: #eee;">
+                
+                <iframe 
+                    src="${embedUrl}" 
+                    width="100%" 
+                    height="800px" 
+                    style="border: none;">
+                    <p>Your browser does not support embedded PDFs.</p>
+                </iframe>
+            </object>`;
     }
 }
-        function renderPage(num) {
+
+      function renderPage(num) {
             pageNum = num;
             pdfDoc.getPage(num).then(page => {
                 const viewport = page.getViewport({scale: scale});
