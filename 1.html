@@ -152,20 +152,46 @@
             }
         }
 
-        function openPDF(index) {
-            const item = PDF_DATA[index];
-            document.getElementById('pdfSelection').style.display = 'none';
-            document.getElementById('pdfViewer').style.display = 'block';
-            document.getElementById('currentPdfTitle').textContent = item.title;
-            
-            const viewUrl = item.url.replace('/view?usp=sharing', '').replace('file/d/', 'uc?export=view&id=');
-            
-            pdfjsLib.getDocument(viewUrl).promise.then(doc => {
-                pdfDoc = doc;
-                document.getElementById('page-count').textContent = doc.numPages;
-                renderPage(1);
-            });
-        }
+function openPDF(index) {
+    const item = PDF_DATA[index];
+    if (!item || !item.url) {
+        alert("Error: PDF link not found.");
+        return;
+    }
+
+    // 1. Hide selection and show viewer
+    document.getElementById('pdfSelection').style.display = 'none';
+    document.getElementById('pdfViewer').style.display = 'block';
+    document.getElementById('currentPdfTitle').textContent = item.title;
+    
+    // 2. Format the URL for direct viewing
+    // This converts standard Drive links into direct stream links that PDF.js prefers
+    let viewUrl = item.url.replace('/view?usp=sharing', '').replace('/view', '');
+    if (viewUrl.includes('file/d/')) {
+        const fileId = viewUrl.split('file/d/')[1].split('/')[0];
+        viewUrl = `https://docs.google.com/uc?export=download&id=${fileId}`;
+    }
+
+    console.log("Attempting to load PDF from:", viewUrl);
+
+    // 3. Load the document using PDF.js
+    const loadingTask = pdfjsLib.getDocument({
+        url: viewUrl,
+        withCredentials: false // Needed for Google Drive public links
+    });
+
+    loadingTask.promise.then(doc => {
+        pdfDoc = doc;
+        document.getElementById('page-count').textContent = doc.numPages;
+        renderPage(1);
+    }).catch(err => {
+        console.error('PDF Load Error:', err);
+        alert("Could not load PDF. This is usually due to Google Drive permission settings or browser security (CORS).");
+        // Fallback: Try opening in a new tab if the viewer fails
+        const openTab = confirm("Viewer failed. Would you like to open the PDF in a new tab instead?");
+        if (openTab) window.open(item.url, '_blank');
+    });
+}
 
         function renderPage(num) {
             pageNum = num;
