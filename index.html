@@ -15,6 +15,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
             padding: 20px;
+            transition: filter 0.3s ease;
         }
 
         .container {
@@ -96,15 +97,9 @@
         }
 
         .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
+        .form-group textarea:focus {
             outline: none;
             border-color: #1e40af;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
         }
 
         .form-row {
@@ -126,6 +121,7 @@
         .btn-primary {
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             color: white;
+            width: 100%;
         }
 
         .btn-primary:hover {
@@ -139,25 +135,12 @@
             transform: none;
         }
 
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
         .pdf-list {
             background: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .pdf-list h2 {
-            margin-bottom: 20px;
-            color: #333;
+            overflow-x: auto;
         }
 
         table {
@@ -183,15 +166,8 @@
             margin-right: 5px;
         }
 
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
 
         .message {
             padding: 15px;
@@ -200,19 +176,10 @@
             display: none;
         }
 
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+        .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* NEW: File upload styling */
+        /* File upload styling */
         .file-upload-wrapper {
             position: relative;
             border: 2px dashed #1e40af;
@@ -220,13 +187,7 @@
             padding: 30px;
             text-align: center;
             background: #f8faff;
-            transition: all 0.3s;
             cursor: pointer;
-        }
-
-        .file-upload-wrapper:hover {
-            background: #e7f3ff;
-            border-color: #3b82f6;
         }
 
         .file-upload-wrapper.dragover {
@@ -236,89 +197,36 @@
 
         .file-upload-wrapper input[type="file"] {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .file-upload-content {
-            pointer-events: none;
-        }
-
-        .file-upload-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
+            width: 100%; height: 100%;
+            top: 0; left: 0;
+            opacity: 0; cursor: pointer;
         }
 
         .file-name-display {
             margin-top: 15px;
             padding: 10px;
-            background: white;
+            background: #fff;
+            border: 1px solid #ddd;
             border-radius: 5px;
             display: none;
         }
 
-        .file-name-display.show {
-            display: block;
-        }
+        .file-name-display.show { display: block; }
 
-        .file-name-display strong {
-            color: #1e40af;
-        }
-
-        .upload-progress {
-            margin-top: 15px;
-            display: none;
-        }
-
-        .upload-progress.show {
-            display: block;
-        }
+        .upload-progress { margin-top: 15px; display: none; }
+        .upload-progress.show { display: block; }
 
         .progress-bar {
-            width: 100%;
-            height: 25px;
+            width: 100%; height: 20px;
             background: #e0e0e0;
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
-            margin-top: 10px;
         }
 
         .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            width: 0%; height: 100%;
+            background: #1e40af;
             transition: width 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .upload-hint {
-            background: #e7f3ff;
-            border-left: 4px solid #1e40af;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 4px;
-        }
-
-        .upload-hint h4 {
-            color: #1e40af;
-            margin-bottom: 10px;
-        }
-
-        .upload-hint ul {
-            margin-left: 20px;
-            color: #555;
-        }
-
-        .upload-hint ul li {
-            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -329,7 +237,7 @@
             <p>Admin Panel for Managing Student Study Materials</p>
         </div>
 
-        <div class="stats" id="stats">
+        <div class="stats">
             <div class="stat-card">
                 <h3>Total PDFs</h3>
                 <div class="number" id="total-pdfs">0</div>
@@ -348,15 +256,10 @@
             <h2>➕ Upload New PDF to Library</h2>
             <div id="message" class="message"></div>
             
-            <form id="pdf-form" enctype="multipart/form-data">
+            <form id="pdf-form">
                 <div class="form-group">
                     <label for="title">Title *</label>
                     <input type="text" id="title" required placeholder="e.g., Genesis Study Guide">
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" placeholder="Brief description of the PDF content for students"></textarea>
                 </div>
 
                 <div class="form-row">
@@ -364,52 +267,36 @@
                         <label for="subject">Subject</label>
                         <input type="text" id="subject" placeholder="e.g., Old Testament">
                     </div>
-
                     <div class="form-group">
                         <label for="class">Class/Course</label>
                         <input type="text" id="class" placeholder="e.g., Pastors Foundation Course">
                     </div>
                 </div>
 
-                <!-- NEW: File Upload Section -->
                 <div class="form-group">
                     <label>Select PDF File *</label>
                     <div class="file-upload-wrapper" id="fileUploadWrapper">
                         <input type="file" id="pdfFile" accept=".pdf" required>
                         <div class="file-upload-content">
-                            <div class="file-upload-icon">📄</div>
-                            <h3>Click to select PDF or drag and drop</h3>
-                            <p style="color: #666; margin-top: 10px;">Maximum file size: 50MB</p>
+                            <div style="font-size: 40px;">📄</div>
+                            <h3>Click or drag PDF here</h3>
+                            <p>Max size: 10MB recommended</p>
                         </div>
                     </div>
                     <div class="file-name-display" id="fileNameDisplay">
-                        <strong>Selected file:</strong> <span id="selectedFileName"></span>
-                        <br>
-                        <small><strong>Size:</strong> <span id="selectedFileSize"></span></small>
-                    </div>
-
-                    <div class="upload-hint">
-                        <h4>✨ Benefits of Direct Upload:</h4>
-                        <ul>
-                            <li>✅ No need for external hosting (Google Drive, Dropbox, etc.)</li>
-                            <li>✅ PDFs stored securely on your server</li>
-                            <li>✅ Faster loading for students</li>
-                            <li>✅ No broken links!</li>
-                            <li>⚠️ Max file size: 50MB per PDF</li>
-                        </ul>
+                        <strong>Selected:</strong> <span id="selectedFileName"></span> | 
+                        <small id="selectedFileSize"></small>
                     </div>
                 </div>
 
                 <div class="upload-progress" id="uploadProgress">
-                    <strong>Uploading...</strong>
+                    <p id="uploadStatus">Processing file...</p>
                     <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill">0%</div>
+                        <div class="progress-fill" id="progressFill"></div>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary" id="submitBtn">
-                    📤 Upload PDF to Library
-                </button>
+                <button type="submit" class="btn-primary" id="submitBtn">📤 Upload PDF to Library</button>
             </form>
         </div>
 
@@ -421,191 +308,169 @@
                         <th>Title</th>
                         <th>Subject</th>
                         <th>Course</th>
-                        <th>Size</th>
                         <th>Views</th>
                         <th>Prints</th>
-                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="pdf-table-body">
-                    <tr>
-                        <td colspan="8" style="text-align: center;">Loading...</td>
-                    </tr>
+                    <tr><td colspan="6" style="text-align: center;">Loading library...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEj-E6Xw9o7bSA6fLQ1AOvu93juU7b1ciNw7Ro0oWg2gnevgUuB4yfSNEutXKdfGoa/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEj-E6Xw9o7bSA6fLQ1AOvu93juU7b1ciNw7Ro0oWg2gnevgUuB4yfSNEutXKdfGoa/exec";
 
-// Elements
-const fileInput = document.getElementById('pdfFile');
-const fileUploadWrapper = document.getElementById('fileUploadWrapper');
-const fileNameDisplay = document.getElementById('fileNameDisplay');
-const selectedFileName = document.getElementById('selectedFileName');
-const selectedFileSize = document.getElementById('selectedFileSize');
-const uploadProgress = document.getElementById('uploadProgress');
-const progressFill = document.getElementById('progressFill');
-const submitBtn = document.getElementById('submitBtn');
+        const fileInput = document.getElementById('pdfFile');
+        const fileUploadWrapper = document.getElementById('fileUploadWrapper');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const selectedFileSize = document.getElementById('selectedFileSize');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressFill = document.getElementById('progressFill');
+        const submitBtn = document.getElementById('submitBtn');
 
-// ========== 1. STATISTICS & DATA LOADING ==========
-async function loadPDFs() {
-    try {
-        const response = await fetch(SCRIPT_URL);
-        const data = await response.json();
-        const tbody = document.getElementById('pdf-table-body');
-        
-        // Update Stat Bar
-        let totalViews = 0;
-        let totalPrints = 0;
-        data.forEach(item => {
-            totalViews += parseInt(item.views || 0);
-            totalPrints += parseInt(item.prints || 0);
-        });
+        // 1. Load Data & Stats
+        async function loadPDFs() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                const tbody = document.getElementById('pdf-table-body');
+                
+                let totalViews = 0, totalPrints = 0;
+                data.forEach(item => {
+                    totalViews += parseInt(item.views || 0);
+                    totalPrints += parseInt(item.prints || 0);
+                });
 
-        document.getElementById('total-pdfs').textContent = data.length;
-        document.getElementById('total-views').textContent = totalViews;
-        document.getElementById('total-prints').textContent = totalPrints;
+                document.getElementById('total-pdfs').textContent = data.length;
+                document.getElementById('total-views').textContent = totalViews;
+                document.getElementById('total-prints').textContent = totalPrints;
 
-        if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No PDFs added yet</td></tr>';
-            return;
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No PDFs in library</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td><strong>${item.title}</strong></td>
+                        <td>${item.subject || '-'}</td>
+                        <td>${item.class || '-'}</td>
+                        <td>${item.views || 0}</td>
+                        <td>${item.prints || 0}</td>
+                        <td>
+                            <button class="btn-small btn-success" onclick="window.open('${item.url}', '_blank')">View</button>
+                            <button class="btn-small btn-danger" onclick="deletePDF(${item.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) { console.error("Load error", e); }
         }
 
-        tbody.innerHTML = data.map((item) => `
-            <tr>
-                <td><strong>${item.title}</strong></td>
-                <td>${item.subject || '-'}</td>
-                <td>${item.class || '-'}</td>
-                <td>-</td>
-                <td>${item.views}</td>
-                <td>${item.prints}</td>
-                <td><span style="color: #28a745">✓ Active</span></td>
-                <td>
-                    <button class="btn-small btn-success" onclick="window.open('${item.url}', '_blank')">View</button>
-                    <button class="btn-small btn-danger" onclick="deletePDF(${item.id})">Delete</button>
-                </td>
-            </tr>
-        `).join('');
-    } catch (error) {
-        console.error('Error loading library:', error);
-    }
-}
+        // 2. Delete Logic
+        async function deletePDF(id) {
+            if (!confirm("Permanently delete this PDF record?")) return;
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'delete', id: id })
+                });
+                if (await res.text() === "Success") {
+                    showMessage("🗑️ Deleted successfully", "success");
+                    loadPDFs();
+                }
+            } catch (e) { showMessage("Delete failed", "error"); }
+        }
 
-// ========== 2. DELETE FUNCTIONALITY ==========
-async function deletePDF(rowId) {
-    if (!confirm('Are you sure you want to delete this PDF?')) return;
-    try {
-        await fetch(SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: 'delete', id: rowId })
-        });
-        showMessage('🗑️ Removed successfully', 'success');
-        loadPDFs();
-    } catch (e) { showMessage('❌ Delete failed', 'error'); }
-}
+        // 3. File Selection UI
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
 
-// ========== 3. DRAG & DROP + FILE SELECTION ==========
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + ['Bytes', 'KB', 'MB', 'GB'][i];
-}
-
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === 'application/pdf') {
-        selectedFileName.textContent = file.name;
-        selectedFileSize.textContent = formatFileSize(file.size);
-        fileNameDisplay.classList.add('show');
-    } else {
-        showMessage('❌ Please select a valid PDF', 'error');
-    }
-});
-
-fileUploadWrapper.addEventListener('dragover', (e) => { e.preventDefault(); fileUploadWrapper.classList.add('dragover'); });
-fileUploadWrapper.addEventListener('dragleave', () => fileUploadWrapper.classList.remove('dragover'));
-fileUploadWrapper.addEventListener('drop', (e) => {
-    e.preventDefault();
-    fileUploadWrapper.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        fileInput.dispatchEvent(new Event('change'));
-    }
-});
-
-// ========== 4. UPLOAD TO DRIVE & SHEET ==========
-document.getElementById('pdf-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const file = fileInput.files[0];
-    if (!file) {
-        showMessage('❌ Please select a PDF file', 'error');
-        return;
-    }
-
-    // Start UI Loading State
-    uploadProgress.classList.add('show');
-    submitBtn.disabled = true;
-    submitBtn.textContent = '⏳ Uploading to Drive...';
-
-    // 1. Convert PDF to Base64 (Required to send files to Google Script)
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async () => {
-        const base64Data = reader.result.split(',')[1];
-        
-        // 2. Prepare the payload to match the new Google Script logic
-        const payload = {
-            action: 'add', // Tells the script to run the "add" logic
-            title: document.getElementById('title').value,
-            subject: document.getElementById('subject').value,
-            class: document.getElementById('class').value,
-            fileName: file.name, // Sends the name to Google Drive
-            fileData: base64Data  // Sends the actual PDF content
-        };
-
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            });
-            
-            const result = await response.text();
-            
-            if (result === "Success") {
-                showMessage('✅ Uploaded to Google Drive & Sheet!', 'success');
-                document.getElementById('pdf-form').reset();
-                fileNameDisplay.classList.remove('show');
-                loadPDFs(); // Refresh table
-            } else {
-                showMessage('❌ ' + result, 'error');
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type === "application/pdf") {
+                selectedFileName.textContent = file.name;
+                selectedFileSize.textContent = formatBytes(file.size);
+                fileNameDisplay.classList.add('show');
             }
-        } catch (error) {
-            showMessage('❌ Error connecting to server', 'error');
-        } finally {
-            uploadProgress.classList.remove('show');
-            submitBtn.disabled = false;
-            submitBtn.textContent = '📤 Upload PDF to Library';
+        });
+
+        // Drag & Drop
+        fileUploadWrapper.addEventListener('dragover', (e) => { e.preventDefault(); fileUploadWrapper.classList.add('dragover'); });
+        fileUploadWrapper.addEventListener('dragleave', () => fileUploadWrapper.classList.remove('dragover'));
+        fileUploadWrapper.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadWrapper.classList.remove('dragover');
+            fileInput.files = e.dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
+        });
+
+        // 4. Upload Logic
+        document.getElementById('pdf-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            submitBtn.disabled = true;
+            uploadProgress.classList.add('show');
+            progressFill.style.width = "30%";
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                const payload = {
+                    action: 'add',
+                    title: document.getElementById('title').value,
+                    subject: document.getElementById('subject').value,
+                    class: document.getElementById('class').value,
+                    fileName: file.name,
+                    fileData: reader.result.split(',')[1]
+                };
+
+                try {
+                    progressFill.style.width = "60%";
+                    const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                    const result = await res.text();
+                    
+                    if (result === "Success") {
+                        progressFill.style.width = "100%";
+                        showMessage("✅ Success! PDF is in Drive & Sheet", "success");
+                        document.getElementById('pdf-form').reset();
+                        fileNameDisplay.classList.remove('show');
+                        loadPDFs();
+                    } else { showMessage("Error: " + result, "error"); }
+                } catch (err) { showMessage("Upload failed", "error"); }
+                finally {
+                    submitBtn.disabled = false;
+                    setTimeout(() => {
+                        uploadProgress.classList.remove('show');
+                        progressFill.style.width = "0%";
+                    }, 2000);
+                }
+            };
+        });
+
+        function showMessage(text, type) {
+            const m = document.getElementById('message');
+            m.textContent = text;
+            m.className = `message ${type}`;
+            m.style.display = 'block';
+            setTimeout(() => m.style.display = 'none', 5000);
         }
-    };
-});
 
-// ========== 5. SECURITY & UI ==========
-window.addEventListener('blur', () => { document.body.style.filter = "blur(15px)"; });
-window.addEventListener('focus', () => { document.body.style.filter = "blur(0px)"; });
+        // Security Blur
+        window.addEventListener('blur', () => document.body.style.filter = "blur(10px)");
+        window.addEventListener('focus', () => document.body.style.filter = "none");
 
-function showMessage(text, type) {
-    const msg = document.getElementById('message');
-    msg.textContent = text;
-    msg.className = 'message ' + type;
-    msg.style.display = 'block';
-    setTimeout(() => msg.style.display = 'none', 5000);
-}
-
-loadPDFs();
+        loadPDFs();
     </script>
 </body>
 </html>
