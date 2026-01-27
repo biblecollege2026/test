@@ -86,30 +86,46 @@
         let pdfDoc = null, pageNum = 1, canvas = document.getElementById('pdf-canvas'), ctx = canvas.getContext('2d');
 
         async function loadLibrary() {
-            const container = document.getElementById('pdf-library-container');
-            try {
-                const response = await fetch(SCRIPT_URL);
-                const data = await response.json();
-                PDF_DATA = data;
+    const container = document.querySelector('.pdf-cards');
+    try {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json();
+        
+        // Clear the static placeholder cards
+        container.innerHTML = ''; 
+        window.PDF_FILE_PATH = {}; // Reset global path object
 
-                container.innerHTML = ''; 
-                data.forEach((item, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'pdf-card';
-                    card.onclick = () => openPDF(index);
-                    card.innerHTML = `
-                        <div class="pdf-card-icon">📖</div>
-                        <h3 class="pdf-card-title">${item.title}</h3>
-                        <p class="pdf-card-subject">${item.subject}</p>
-                        <p style="font-size:0.8em; color:#999;">Class: ${item.class}</p>
-                        <button style="margin-top:10px;">View Material</button>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (e) {
-                container.innerHTML = "<p>Error loading library. Please check your Script URL.</p>";
-            }
-        }
+        data.forEach((item, index) => {
+            const id = index + 1;
+            
+            // Format the Drive URL for the PDF viewer logic
+            const directUrl = item.url.replace('/view?usp=sharing', '').replace('file/d/', 'uc?export=view&id=');
+            
+            // Store for the openPDF(id) function already in your 1.html
+            window.PDF_FILE_PATH[id] = {
+                file: directUrl,
+                title: item.title
+            };
+
+            // 3. Create the Panel matching your screenshot
+            const card = document.createElement('div');
+            card.className = 'pdf-card';
+            // Match the click behavior from your original file
+            card.onclick = () => openPDF(id); 
+            
+            card.innerHTML = `
+                <div class="pdf-card-icon">📖</div>
+                <h3 class="pdf-card-title">${item.title}</h3>
+                <p class="pdf-card-desc">${item.subject || 'Study Guide'} - ${item.class || ''}</p>
+                <button onclick="event.stopPropagation(); openPDF(${id})">VIEW STUDY MATERIAL</button>
+            `;
+            container.appendChild(card);
+        });
+    } catch (e) {
+        console.error("Library load error:", e);
+        container.innerHTML = "<p style='text-align:center; width:100%;'>Error loading materials. Please try again.</p>";
+    }
+}
 
        function verifyAccess() {
     const emailInput = document.getElementById('studentEmail');
