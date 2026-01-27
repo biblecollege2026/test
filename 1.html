@@ -159,40 +159,32 @@ function openPDF(index) {
         return;
     }
 
-    // 1. Hide selection and show viewer
-    document.getElementById('pdfSelection').style.display = 'none';
+    // 1. Show the viewer section
+    window.hideAllContentSections();
     document.getElementById('pdfViewer').style.display = 'block';
     document.getElementById('currentPdfTitle').textContent = item.title;
-    
-    // 2. Format the URL for direct viewing
-    // This converts standard Drive links into direct stream links that PDF.js prefers
-    let viewUrl = item.url.replace('/view?usp=sharing', '').replace('/view', '');
-    if (viewUrl.includes('file/d/')) {
-        const fileId = viewUrl.split('file/d/')[1].split('/')[0];
-        viewUrl = `https://docs.google.com/uc?export=download&id=${fileId}`;
+
+    // 2. Extract the File ID and create the Embedded Preview link
+    let fileId = "";
+    if (item.url.includes('id=')) {
+        fileId = item.url.split('id=')[1].split('&')[0];
+    } else if (item.url.includes('file/d/')) {
+        fileId = item.url.split('file/d/')[1].split('/')[0];
     }
 
-    console.log("Attempting to load PDF from:", viewUrl);
+    const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
 
-    // 3. Load the document using PDF.js
-    const loadingTask = pdfjsLib.getDocument({
-        url: viewUrl,
-        withCredentials: false // Needed for Google Drive public links
-    });
-
-    loadingTask.promise.then(doc => {
-        pdfDoc = doc;
-        document.getElementById('page-count').textContent = doc.numPages;
-        renderPage(1);
-    }).catch(err => {
-        console.error('PDF Load Error:', err);
-        alert("Could not load PDF. This is usually due to Google Drive permission settings or browser security (CORS).");
-        // Fallback: Try opening in a new tab if the viewer fails
-        const openTab = confirm("Viewer failed. Would you like to open the PDF in a new tab instead?");
-        if (openTab) window.open(item.url, '_blank');
-    });
+    // 3. Replace the Canvas with the Iframe Viewer
+    // We target the area where the canvas used to be
+    const viewerContainer = document.querySelector('.canvas-wrapper');
+    viewerContainer.innerHTML = `
+        <iframe src="${embedUrl}" 
+                width="100%" 
+                height="800px" 
+                style="border: 3px solid #1e3c72; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);" 
+                allow="autoplay">
+        </iframe>`;
 }
-
         function renderPage(num) {
             pageNum = num;
             pdfDoc.getPage(num).then(page => {
