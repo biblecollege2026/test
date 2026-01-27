@@ -127,14 +127,18 @@
     }
 }
 
-       function verifyAccess() {
+      function verifyAccess() {
     const emailInput = document.getElementById('studentEmail');
-    const errorMsg = document.getElementById('errorMsg');
-    const successMsg = document.getElementById('successMsg');
+    const errorMsg = document.getElementById('errorMsg');   // Must match HTML ID
+    const successMsg = document.getElementById('successMsg'); // Must match HTML ID
     const email = emailInput.value.trim().toLowerCase();
 
-    errorMsg.style.display = 'none';
-    successMsg.style.display = 'none';
+    // The error happens here because errorMsg is null
+    if (errorMsg) errorMsg.style.display = 'none'; 
+    if (successMsg) successMsg.style.display = 'none';
+
+    <div id="errorMsg" class="error-msg"></div>
+<div id="successMsg" class="success-msg"></div>
 
     if (ALLOWED_EMAILS[email]) {
         window.studentEmail = email; 
