@@ -111,20 +111,47 @@
             }
         }
 
-        function verifyAccess() {
-            const email = document.getElementById('studentEmail').value.trim().toLowerCase();
-            if (ALLOWED_EMAILS[email]) {
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('pdfSelection').style.display = 'block';
-                document.getElementById('loggedEmail').textContent = "👤 " + ALLOWED_EMAILS[email];
-                loadLibrary(); // Fetch from Sheet
-            } else {
-                const err = document.getElementById('errorMsg');
-                err.style.display = 'block';
-                err.textContent = "Email not registered.";
-            }
-        }
+       function verifyAccess() {
+    const emailInput = document.getElementById('studentEmail');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const email = emailInput.value.trim().toLowerCase();
 
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+
+    if (ALLOWED_EMAILS[email]) {
+        window.studentEmail = email; 
+        window.studentName = ALLOWED_EMAILS[email];
+
+        if (typeof ActivityLogger !== 'undefined') ActivityLogger.init();
+        successMsg.textContent = '✅ Access granted! Loading...';
+        successMsg.style.display = 'block';
+        
+        setTimeout(() => {
+            window.hideAllContentSections(); 
+
+            if (email === 'jlibiblecollege@gmail.com') {
+                // ADMIN SUCCESS logic
+                document.getElementById('adminLoggedEmail').textContent = window.studentName;
+                if (typeof window.showAdminDashboard === 'function') window.showAdminDashboard();
+            } else {
+                // STUDENT SUCCESS logic
+                document.getElementById('loggedEmail').textContent = window.studentName;
+                document.getElementById('pdfSelection').style.display = 'block';
+                
+                // --- THIS IS THE CRITICAL ADDITION ---
+                loadLibraryFromDrive(); 
+                // -------------------------------------
+
+                if (typeof window.addAdditionalButtons === 'function') window.addAdditionalButtons();
+            }
+        }, 1000);
+    } else {
+        errorMsg.textContent = '❌ Access Denied: Your email is not registered.';
+        errorMsg.style.display = 'block';
+    }
+}
         function openPDF(index) {
             const item = PDF_DATA[index];
             document.getElementById('pdfSelection').style.display = 'none';
