@@ -72,14 +72,16 @@
     </div>
 
 
-       <script>
-    // Initialize PDF.js worker
+      
+
+
+
+    <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    // 1. YOUR GOOGLE APPS SCRIPT WEB APP URL (Replace this with your actual URL)
+    // 1. YOUR GOOGLE APPS SCRIPT WEB APP URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEj-E6Xw9o7bSA6fLQ1AOvu93juU7b1ciNw7Ro0oWg2gnevgUuB4yfSNEutXKdfGoa/exec";
 
-    // Authorized emails list
     const ALLOWED_EMAILS = {
         'p82158860@gmail.com': 'Pritee Gaikwad',
         'ranjeeta.kamble333@gmail.com': 'Ranjana Kamble',
@@ -107,9 +109,9 @@
     const canvas = document.getElementById('pdf-canvas');
     const ctx = canvas.getContext('2d');
 
-    // Function to load the library cards dynamically
+    // Load the library from your Google Sheet script
     async function loadLibrary() {
-        const container = document.getElementById('pdf-library-container');
+        const container = document.querySelector('.pdf-cards');
         if(!container) return;
 
         try {
@@ -119,13 +121,14 @@
 
             container.innerHTML = ''; 
             data.forEach((item, index) => {
+                // Remove backslash from ${} to fix the display error
                 const card = document.createElement('div');
                 card.className = 'pdf-card';
                 card.onclick = () => openPDF(index);
                 card.innerHTML = `
                     <div class="pdf-card-icon">📖</div>
-                    <h3 class="pdf-card-title">\${item.title}</h3>
-                    <p class="pdf-card-desc">\${item.subject || 'Study Guide'}</p>
+                    <h3 class="pdf-card-title">${item.title}</h3>
+                    <p class="pdf-card-desc">${item.subject || 'Study Guide'}</p>
                     <button>VIEW STUDY MATERIAL</button>
                 `;
                 container.appendChild(card);
@@ -135,24 +138,17 @@
         }
     }
 
-    // Main Access Function
     function verifyAccess() {
         const emailInput = document.getElementById('studentEmail');
+        const email = emailInput.value.trim().toLowerCase();
         const errorMsg = document.getElementById('errorMsg');
         const successMsg = document.getElementById('successMsg');
-        const email = emailInput.value.trim().toLowerCase();
-
-        if (errorMsg) errorMsg.style.display = 'none';
-        if (successMsg) successMsg.style.display = 'none';
 
         if (ALLOWED_EMAILS[email]) {
             window.studentEmail = email;
             window.studentName = ALLOWED_EMAILS[email];
-            
-            if (successMsg) {
-                successMsg.textContent = '✅ Access granted! Loading...';
-                successMsg.style.display = 'block';
-            }
+            successMsg.textContent = '✅ Access granted! Loading...';
+            successMsg.style.display = 'block';
             
             setTimeout(() => {
                 window.hideAllContentSections();
@@ -162,23 +158,20 @@
                 } else {
                     document.getElementById('loggedEmail').textContent = window.studentName;
                     document.getElementById('pdfSelection').style.display = 'block';
-                    loadLibrary(); // Dynamically build the panels
+                    loadLibrary(); // Call the dynamic loader here
                 }
             }, 1000);
         } else {
-            if (errorMsg) {
-                errorMsg.textContent = '❌ Access Denied: Email not registered.';
-                errorMsg.style.display = 'block';
-            }
+            errorMsg.textContent = '❌ Access Denied: Email not registered.';
+            errorMsg.style.display = 'block';
         }
     }
 
-    // Existing Navigation Functions
     window.hideAllContentSections = function() {
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('pdfSelection').style.display = 'none';
         document.getElementById('pdfViewer').style.display = 'none';
-        if(document.getElementById('adminDashboard')) document.getElementById('adminDashboard').style.display = 'none';
+        document.getElementById('adminDashboard').style.display = 'none';
     };
 
     function openPDF(index) {
@@ -187,9 +180,10 @@
         document.getElementById('pdfViewer').style.display = 'block';
         document.getElementById('currentPdfTitle').textContent = item.title;
         
-        const directUrl = item.url.replace('/view?usp=sharing', '').replace('file/d/', 'uc?export=view&id=');
+        // Ensure link is formatted correctly for viewing
+        const viewUrl = item.url.replace('/view?usp=sharing', '').replace('file/d/', 'uc?export=view&id=');
         
-        pdfjsLib.getDocument(directUrl).promise.then(doc => {
+        pdfjsLib.getDocument(viewUrl).promise.then(doc => {
             pdfDoc = doc;
             document.getElementById('page-count').textContent = doc.numPages;
             renderPage(1);
@@ -211,7 +205,7 @@
     function nextPage() { if (pageNum >= pdfDoc.numPages) return; renderPage(pageNum + 1); }
     function logout() { location.reload(); }
     function backToSelection() { window.hideAllContentSections(); document.getElementById('pdfSelection').style.display = 'block'; }
-</script>
     </script>
+
 </body>
 </html>
