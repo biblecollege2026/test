@@ -175,7 +175,7 @@ window.hideAllContentSections = function() {
     document.getElementById('pdfViewer').style.display = 'block';
     document.getElementById('currentPdfTitle').textContent = item.title;
 
-    // 1. Extract the File ID
+    // 1. Precise ID Extraction
     let fileId = "";
     if (item.url.includes('id=')) {
         fileId = item.url.split('id=')[1].split('&')[0];
@@ -183,20 +183,21 @@ window.hideAllContentSections = function() {
         fileId = item.url.split('file/d/')[1].split('/')[0];
     }
 
-    // 2. THE CRITICAL CHANGE: Use the Google Docs Viewer wrapper
-    // This is the "Official Embedding Method" that avoids the CSP error.
-    const googleViewerUrl = `https://docs.google.com/viewer?srcid=${fileId}&pid=explorer&efb=true&usb=true&embedded=true`;
+    // 2. The most stable "Google Docs Viewer" URL structure
+    const googleViewerUrl = `https://docs.google.com/viewer?url=https://docs.google.com/uc?id=${fileId}&embedded=true`;
 
     const viewerContainer = document.querySelector('.canvas-wrapper');
     if (viewerContainer) {
+        // We add a 'key' to the iframe to force a fresh load every time
         viewerContainer.innerHTML = `
             <iframe 
                 src="${googleViewerUrl}" 
                 width="100%" 
                 height="800px" 
-                style="border: 3px solid #1e3c72; border-radius: 12px; background: white;" 
-                allowfullscreen="true" 
-                frameborder="0">
+                style="border: 2px solid #1e3c72; border-radius: 12px; background: white;" 
+                allowfullscreen="true"
+                webkitallowfullscreen="true" 
+                mozallowfullscreen="true">
             </iframe>`;
     }
 }
