@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="mr">
 <head>
     <meta charset="UTF-8">
@@ -11,7 +11,7 @@
         .header { background: #1e3c72; color: white; padding: 30px; text-align: center; border-bottom: 5px solid #ffd700; }
         .content { padding: 30px; }
         
-        /* Form Styling to fix 'id/name' warnings */
+        /* Form Styling */
         .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 6px; }
         
         /* Grid for Chapters */
@@ -24,18 +24,50 @@
         .viewer-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .iframe-container { 
             width: 100%; 
-            height: 750px; 
+            height: 800px; 
             border: 4px solid #1e3c72; 
             border-radius: 8px; 
-            background: #525659; /* PDF Viewer dark background */
+            background: #525659; 
         }
         iframe { width: 100%; height: 100%; border: none; }
         
         .btn { padding: 10px 20px; background: #1e3c72; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-green { background: #28a745; }
+        .btn-print { background: #e67e22; }
+
+        /* PRINT PROTECTION LOGIC */
+        .print-shield { display: none; }
+
+        @media print {
+            /* Hide all UI elements */
+            body * { visibility: hidden !important; }
+            .header, .viewer-toolbar, .login-box, .pdf-cards { display: none !important; }
+
+            /* Show ONLY the PDF area */
+            #pdfViewer, #pdfViewer *, .iframe-container, iframe {
+                visibility: visible !important;
+                display: block !important;
+            }
+
+            /* The Shield: Designed to interfere with digital 'Save as PDF' drivers */
+            .print-shield {
+                display: block !important;
+                visibility: visible !important;
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: white;
+                z-index: 10000;
+                /* Some browsers render this over the digital PDF stream */
+            }
+
+            #pdfViewer { position: absolute; top: 0; left: 0; width: 100%; }
+            .iframe-container { border: none !important; height: 100vh !important; }
+        }
     </style>
 </head>
 <body>
+
+<div class="print-shield"></div>
 
 <div class="container">
     <div class="header">
@@ -53,18 +85,16 @@
 
         <div id="pdfSelection" style="display:none;">
             <h2 style="margin-bottom:20px; border-left: 5px solid #ffd700; padding-left: 10px;">Select Chapter</h2>
-            <div id="pdf-library-container" class="pdf-cards">
-                </div>
+            <div id="pdf-library-container" class="pdf-cards"></div>
         </div>
 
         <div id="pdfViewer">
             <div class="viewer-toolbar">
                 <button class="btn" onclick="backToSelection()">⬅️ Back</button>
                 <h3 id="currentPdfTitle"></h3>
-                <button class="btn btn-green" onclick="openExternal()">🔓 Full Screen</button>
+                <button class="btn btn-print" onclick="handlePrint()">🖨️ Print Paper</button>
             </div>
-            <div class="iframe-container" id="iframeWrapper">
-                </div>
+            <div class="iframe-container" id="iframeWrapper"></div>
         </div>
     </div>
 </div>
@@ -73,7 +103,14 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEj-E6Xw9o7bSA6fLQ1AOvu93juU7b1ciNw7Ro0oWg2gnevgUuB4yfSNEutXKdfGoa/exec"; 
     const ALLOWED_EMAILS = { 'jlibiblecollege@gmail.com': 'Admin', 'p82158860@gmail.com': 'Pritee' };
     let PDF_DATA = [];
-    let currentActiveIndex = null;
+
+    // Helper to switch views
+    function showSection(id) {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('pdfSelection').style.display = 'none';
+        document.getElementById('pdfViewer').style.display = 'none';
+        document.getElementById(id).style.display = 'block';
+    }
 
     async function loadLibrary() {
         const container = document.getElementById('pdf-library-container');
@@ -95,8 +132,7 @@
     function verifyAccess() {
         const email = document.getElementById('studentEmail').value.trim().toLowerCase();
         if (ALLOWED_EMAILS[email]) {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('pdfSelection').style.display = 'block';
+            showSection('pdfSelection');
             loadLibrary();
         } else {
             document.getElementById('errorMsg').style.display = 'block';
@@ -104,47 +140,36 @@
     }
 
     function openPDF(index) {
-    currentActiveIndex = index;
-    const item = PDF_DATA[index];
-    if (!item || !item.url) return;
+        const item = PDF_DATA[index];
+        if (!item || !item.url) return;
 
-    window.hideAllContentSections();
-    document.getElementById('pdfViewer').style.display = 'block';
-    document.getElementById('currentPdfTitle').textContent = item.title;
+        showSection('pdfViewer');
+        document.getElementById('currentPdfTitle').textContent = item.title;
 
-    // 1. Get the File ID
-    let fileId = "";
-    if (item.url.includes('id=')) {
-        fileId = item.url.split('id=')[1].split('&')[0];
-    } else if (item.url.includes('file/d/')) {
-        fileId = item.url.split('file/d/')[1].split('/')[0];
+        let fileId = "";
+        if (item.url.includes('id=')) {
+            fileId = item.url.split('id=')[1].split('&')[0];
+        } else if (item.url.includes('file/d/')) {
+            fileId = item.url.split('file/d/')[1].split('/')[0];
+        }
+
+        // ViewerNG is used for maximum internal compatibility
+        const finalUrl = `https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent('https://docs.google.com/uc?export=download&id=' + fileId)}`;
+
+        const wrapper = document.getElementById('iframeWrapper');
+        if (wrapper) {
+            wrapper.innerHTML = `<iframe src="${finalUrl}" allow="autoplay"></iframe>`;
+        }
     }
 
-    // 2. The "Direct-To-Browser" Viewer URL
-    // This bypasses the drive.google.com frame-ancestor block
-    const finalUrl = `https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent('https://docs.google.com/uc?export=download&id=' + fileId)}`;
-
-    const wrapper = document.getElementById('iframeWrapper');
-    if (wrapper) {
-        wrapper.innerHTML = `
-            <iframe 
-                src="${finalUrl}" 
-                width="100%" 
-                height="800px" 
-                style="border: none; background: #f4f4f4;"
-                allow="autoplay">
-            </iframe>`;
-    }
-}
-
-    function openExternal() {
-        if (currentActiveIndex !== null) window.open(PDF_DATA[currentActiveIndex].url, '_blank');
+    function handlePrint() {
+        alert("Preparing for physical print. Note: 'Save as PDF' is restricted.");
+        window.print();
     }
 
     function backToSelection() {
-        document.getElementById('pdfViewer').style.display = 'none';
-        document.getElementById('pdfSelection').style.display = 'block';
-        document.getElementById('iframeWrapper').innerHTML = ''; // Clear memory
+        showSection('pdfSelection');
+        document.getElementById('iframeWrapper').innerHTML = ''; 
     }
 </script>
 
