@@ -104,25 +104,38 @@
     }
 
     function openPDF(index) {
-        currentActiveIndex = index;
-        const item = PDF_DATA[index];
-        document.getElementById('pdfSelection').style.display = 'none';
-        document.getElementById('pdfViewer').style.display = 'block';
-        document.getElementById('currentPdfTitle').textContent = item.title;
+    currentActiveIndex = index;
+    const item = PDF_DATA[index];
+    if (!item || !item.url) return;
 
-        let fileId = "";
-        if (item.url.includes('id=')) {
-            fileId = item.url.split('id=')[1].split('&')[0];
-        } else {
-            fileId = item.url.split('/d/')[1].split('/')[0];
-        }
+    window.hideAllContentSections();
+    document.getElementById('pdfViewer').style.display = 'block';
+    document.getElementById('currentPdfTitle').textContent = item.title;
 
-        // Using the Google Docs Viewer with specific 'embedded=true' to bypass CSP
-        const viewerUrl = `https://docs.google.com/viewer?url=https://docs.google.com/uc?id=${fileId}&embedded=true`;
-
-        const wrapper = document.getElementById('iframeWrapper');
-        wrapper.innerHTML = `<iframe src="${viewerUrl}" allow="autoplay"></iframe>`;
+    // 1. Get the File ID
+    let fileId = "";
+    if (item.url.includes('id=')) {
+        fileId = item.url.split('id=')[1].split('&')[0];
+    } else if (item.url.includes('file/d/')) {
+        fileId = item.url.split('file/d/')[1].split('/')[0];
     }
+
+    // 2. The "Direct-To-Browser" Viewer URL
+    // This bypasses the drive.google.com frame-ancestor block
+    const finalUrl = `https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent('https://docs.google.com/uc?export=download&id=' + fileId)}`;
+
+    const wrapper = document.getElementById('iframeWrapper');
+    if (wrapper) {
+        wrapper.innerHTML = `
+            <iframe 
+                src="${finalUrl}" 
+                width="100%" 
+                height="800px" 
+                style="border: none; background: #f4f4f4;"
+                allow="autoplay">
+            </iframe>`;
+    }
+}
 
     function openExternal() {
         if (currentActiveIndex !== null) window.open(PDF_DATA[currentActiveIndex].url, '_blank');
