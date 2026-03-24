@@ -183,6 +183,10 @@ header{height:52px;display:flex;align-items:center;justify-content:space-between
 .att-empty{text-align:center;color:var(--dim);font-size:13px;padding:36px 0;line-height:1.8}
 .warn-box{background:var(--amber-d);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.6;color:var(--amber);margin-bottom:14px}
 
+/* Control blockers — cover Drive player chrome so video looks live */
+#topBlock{display:none;position:absolute;top:0;left:0;right:0;height:44px;background:#000;z-index:9;pointer-events:all}
+#bottomBlock{display:none;position:absolute;bottom:0;left:0;right:0;height:56px;background:#000;z-index:9;pointer-events:all}
+
 .toast{position:fixed;bottom:20px;right:20px;background:var(--s3);border:1px solid var(--b2);border-radius:9px;padding:10px 16px;font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none}
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.ok{border-color:rgba(31,212,122,.5);color:var(--green)}
@@ -257,6 +261,8 @@ header{height:52px;display:flex;align-items:center;justify-content:space-between
       </div>
 
       <!-- VIDEO injected after join gesture so browser allows autoplay -->
+      <div id="topBlock"></div>
+      <div id="bottomBlock"></div>
       <iframe id="mainVid" src="" allowfullscreen
         allow="autoplay; encrypted-media; picture-in-picture"
         style="display:none;width:100%;height:100%;border:none"></iframe>
@@ -428,6 +434,8 @@ function showVideo(driveId){
   const vid = document.getElementById('mainVid');
   vid.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
   vid.style.display = 'block';
+  document.getElementById('topBlock').style.display = 'block';
+  document.getElementById('bottomBlock').style.display = 'block';
   setTimeout(()=>{
     try{
       const doc=vid.contentDocument;
@@ -545,6 +553,8 @@ function applyAll(){
   document.getElementById('driveFallback').style.display='none';
   document.getElementById('mainVid').src='';
   document.getElementById('mainVid').style.display='none';
+  document.getElementById('topBlock').style.display='none';
+  document.getElementById('bottomBlock').style.display='none';
   document.getElementById('joinGate').style.display='flex';
   document.getElementById('jBtn').disabled=false;
   document.getElementById('jBtn').textContent='Join Class →';
@@ -589,6 +599,8 @@ function switchClass(i){
   document.getElementById('driveFallback').style.display='none';
   document.getElementById('mainVid').src='';
   document.getElementById('mainVid').style.display='none';
+  document.getElementById('topBlock').style.display='none';
+  document.getElementById('bottomBlock').style.display='none';
   document.getElementById('joinGate').style.display='flex';
   document.getElementById('jBtn').disabled=false;
   document.getElementById('jBtn').textContent='Join Class →';
