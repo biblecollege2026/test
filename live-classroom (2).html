@@ -393,7 +393,7 @@ header{height:52px;display:flex;align-items:center;justify-content:space-between
 const PW = "admin123";
 let S = {
   course:"My Course", instructor:"Instructor", scriptUrl:"",
-  classes:[{title:"Class 1",driveId:"",status:"live"}],
+  classes:[{title:"Class 1",driveId:"14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG",status:"live"}],
   liveIdx:0
 };
 let roster = [];
@@ -424,7 +424,7 @@ function doJoin(){
   if(S.scriptUrl){
     fetch(S.scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)}).catch(()=>{});
   }
-  const videoUrl = (S.classes[S.liveIdx]||S.classes[0]||{}).driveId || '';
+  const videoUrl = (S.classes[S.liveIdx]||S.classes[0]||{}).driveId || '14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG';
   document.getElementById('joinGate').style.display='none';
   showVideo(videoUrl);
   toast('Welcome '+name+'! Enjoy the class.','ok');
