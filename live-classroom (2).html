@@ -243,13 +243,7 @@ header{height:52px;display:flex;align-items:center;justify-content:space-between
     </div>
     EduLive
   </div>
-  <div class="hdr-right">
-    <div class="hdr-meta" id="hdrMeta">Course: <span id="hdrCourse">My Course</span></div>
-    <button class="admin-btn" onclick="openAdmin()">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm-.75 3.5a.75.75 0 011.5 0V8a.75.75 0 01-1.5 0V5.5zm.75 5.25a.875.875 0 110-1.75.875.875 0 010 1.75z"/></svg>
-      Admin
-    </button>
-  </div>
+
 </header>
 
 <div class="layout">
@@ -458,14 +452,10 @@ function doJoin() {
   }
   err.style.display = 'none';
 
-  const btn = document.getElementById('jBtn');
-  btn.disabled = true;
-  btn.textContent = 'Joining Live Class...';
-
-  // 1. YOUR TUESDAY VIDEO ID (extracted from your link)
+  // THE AUTOMATIC VIDEO ID (From your link)
   const driveId = "14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG";
 
-  // 2. Log Attendance (Same as your original system)
+  // Log attendance locally
   const entry = {
     name,
     roll,
@@ -475,13 +465,9 @@ function doJoin() {
   roster.unshift(entry);
   localStorage.setItem('edu_roster', JSON.stringify(roster));
 
-  // 3. Switch to Video View
+  // Hide the join screen and show video
   document.getElementById('joinGate').style.display = 'none';
-  
-  // 4. Start the Video Automatically
   showVideo(driveId);
-  
-  toast('Welcome ' + name + '! The live session has started.', 'ok');
 }
 
 function showVideo(driveId) {
@@ -678,7 +664,7 @@ function switchClass(i){
   document.getElementById('driveFallback').style.display='none';
   document.getElementById('mainVid').src='';
   document.getElementById('mainVid').style.display='none';
-  document.getElementById('joinGate').style.display='flex';
+  document.getElementById('fjoinGate').style.display='flex';
   document.getElementById('jBtn').disabled=false;
   document.getElementById('jBtn').textContent='Join Class →';
 }
