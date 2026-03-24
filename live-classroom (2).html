@@ -187,6 +187,56 @@ header{height:52px;display:flex;align-items:center;justify-content:space-between
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.ok{border-color:rgba(31,212,122,.5);color:var(--green)}
 .toast.err{border-color:rgba(255,58,84,.5);color:var(--red)}
+
+  /* Bottom Shield: Hides the progress bar and time */
+.bottom-shield {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px; /* Adjust height to cover the seek bar */
+  background: var(--bg); /* Matches your dark theme */
+  z-index: 100;
+  cursor: default;
+}
+
+/* Top Shield: Hides the download and pop-out icons */
+.top-shield {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 55px;
+  background: var(--bg);
+  z-index: 100;
+}
+
+/* Red "LIVE" Indicator */
+.live-indicator {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.blink {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker { 50% { opacity: 0; } }
 </style>
 </head>
 <body>
@@ -402,26 +452,69 @@ window.addEventListener('DOMContentLoaded',()=>{
 });
 
 /* JOIN */
-function doJoin(){
-  const name=document.getElementById('jName').value.trim();
-  const roll=document.getElementById('jRoll').value.trim();
-  const err=document.getElementById('jErr');
-  if(!name||!roll){err.style.display='block';return;}
-  err.style.display='none';
-  const btn=document.getElementById('jBtn');
-  btn.disabled=true; btn.textContent='Joining…';
-  const cls=S.classes[S.liveIdx]||S.classes[0]||{};
-  const entry={name,roll,classTitle:cls.title||'Class 1',time:now()};
-  roster.unshift(entry);
-  document.getElementById('tCount').textContent=roster.length;
-  document.getElementById('vcnt').textContent=roster.length;
-  if(S.scriptUrl){
-    fetch(S.scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)}).catch(()=>{});
+// 1. PASTE YOUR FULL GOOGLE DRIVE LINK HERE
+const TUESDAY_LINK = "https://drive.google.com/file/d/14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG/view?usp=drive_link";
+
+let roster = JSON.parse(localStorage.getItem('edu_roster') || "[]");
+
+/* THE JOIN FUNCTION */
+function doJoin() {
+  const name = document.getElementById('jName').value.trim();
+  const roll = document.getElementById('jRoll').value.trim();
+
+  if (!name || !roll) {
+    toast('Please enter Name and Roll Number', 'err');
+    return;
   }
-  const driveId = (S.classes[S.liveIdx]||S.classes[0]||{}).driveId || '14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG';
-  document.getElementById('joinGate').style.display='none';
+
+  // This automatically turns your long link into a working ID
+  const driveId = extractId(TUESDAY_LINK);
+
+  if (!driveId) {
+    toast('Invalid Link! Please check TUESDAY_LINK at the top of the code.', 'err');
+    return;
+  }
+
+  // Log attendance
+  const entry = { name, roll, classTitle: "Live Session", time: new Date().toLocaleTimeString() };
+  roster.unshift(entry);
+  localStorage.setItem('edu_roster', JSON.stringify(roster));
+
+  // Hide Join Screen & Start Video
+  document.getElementById('joinGate').style.display = 'none';
   showVideo(driveId);
-  toast('Welcome '+name+'! Enjoy the class.','ok');
+}
+
+/* THE VIDEO PLAYER (With Live Shields) */
+function showVideo(driveId) {
+  const wrap = document.getElementById('videoWrap');
+  const vid = document.getElementById('mainVid');
+
+  // Set Source
+  vid.src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1`;
+  vid.style.display = 'block';
+
+  // Hides the "Recorded" progress bar and download buttons
+  const bShield = document.createElement('div');
+  bShield.className = 'bottom-shield';
+  const tShield = document.createElement('div');
+  tShield.className = 'top-shield';
+
+  wrap.appendChild(bShield);
+  wrap.appendChild(tShield);
+}
+
+/* THE CLEANER (Extracts ID from Full Link) */
+function extractId(url) {
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+  return match ? match[1] : null;
+}
+
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 function showVideo(driveId){
