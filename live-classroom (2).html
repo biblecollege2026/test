@@ -423,300 +423,81 @@ header{height:52px;display:flex;align-items:center;justify-content:space-between
 <div class="toast" id="toast"></div>
 
 <script>
-const PW = "admin123";
-let S = {
-  course:"My Course", instructor:"Instructor", scriptUrl:"",
-  classes:[{title:"Class 1",driveId:"14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG",status:"live"}],
-  liveIdx:0
-};
-let roster = [];
+// 1. YOUR TUESDAY VIDEO LINK (Directly pasted here)
+const TUESDAY_LINK = "https://drive.google.com/file/d/14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG/view?usp=drive_link";
 
-/* INIT */
-window.addEventListener('DOMContentLoaded',()=>{
-  renderSidebar();
-  setInterval(()=>{
-    const n = Math.max(1, roster.length) + Math.floor(Math.random()*3);
-    document.getElementById('vcnt').textContent = n;
-  },5000);
+let roster = JSON.parse(localStorage.getItem('edu_roster') || "[]");
+
+/* INIT - Runs when page loads */
+window.addEventListener('DOMContentLoaded', () => {
+    // Random viewer count for the "Live" effect
+    setInterval(() => {
+        const n = Math.max(15, roster.length) + Math.floor(Math.random() * 5);
+        document.getElementById('vcnt').textContent = n;
+    }, 5000);
 });
 
-/* JOIN */
+/* THE JOIN FUNCTION (No Admin Login Needed) */
 function doJoin() {
-  const name = document.getElementById('jName').value.trim();
-  const roll = document.getElementById('jRoll').value.trim();
+    const name = document.getElementById('jName').value.trim();
+    const roll = document.getElementById('jRoll').value.trim();
 
-  if (!name || !roll) {
-    toast('Please enter Name and Roll Number', 'err');
-    return;
-  }
+    if (!name || !roll) {
+        toast('Please enter Name and Roll Number', 'err');
+        return;
+    }
 
-  // DIRECTLY PASTE YOUR FULL LINK HERE
-  const fullLink = "https://drive.google.com/file/d/14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG/view?usp=drive_link";
+    // Automatically clean the full link to get the ID
+    const driveId = xid(TUESDAY_LINK);
 
-  // This "cleans" the link to get the ID automatically
-  const driveId = xid(fullLink);
+    if (!driveId) {
+        toast('Invalid Video Link. Check TUESDAY_LINK variable.', 'err');
+        return;
+    }
 
-  if (!driveId) {
-    toast('Invalid Google Drive Link', 'err');
-    return;
-  }
+    // Log attendance
+    const entry = { name, roll, classTitle: "Tuesday Live Session", time: new Date().toLocaleTimeString() };
+    roster.unshift(entry);
+    localStorage.setItem('edu_roster', JSON.stringify(roster));
 
-  // Log attendance
-  const entry = { name, roll, classTitle: "Live Session", time: new Date().toLocaleTimeString() };
-  roster.unshift(entry);
-  localStorage.setItem('edu_roster', JSON.stringify(roster));
-
-  // Hide Join Screen & Start Video
-  document.getElementById('joinGate').style.display = 'none';
-  showVideo(driveId);
+    // Hide Join Screen & Start Video
+    document.getElementById('joinGate').style.display = 'none';
+    showVideo(driveId);
+    
+    toast('Welcome ' + name + '! Class is starting.', 'ok');
 }
 
-// This helper ensures that even if you paste a full link, the player works
-function xid(url) {
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
-  return match ? match[1] : null;
-}
-
-function showVideo(driveId) {
-  const vid = document.getElementById('mainVid');
-  const wrap = document.getElementById('videoWrap');
-
-  // Force autoplay and hide related files
-  vid.src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1&mute=0`;
-  vid.style.display = 'block';
-
-  // CREATE THE LIVE SHIELD (Hides the 0:01 / 2:03:12 bar)
-  const shield = document.createElement('div');
-  shield.style.position = 'absolute';
-  shield.style.bottom = '0';
-  shield.style.left = '0';
-  shield.style.width = '100%';
-  shield.style.height = '50px'; // Covers the Google Drive seek bar
-  shield.style.background = 'transparent'; 
-  shield.style.zIndex = '100';
-  shield.style.cursor = 'default';
-  
-  wrap.appendChild(shield);
-}
-
+/* THE VIDEO PLAYER (With "Live Shield" to hide playback bar) */
 function showVideo(driveId) {
     const wrap = document.getElementById('videoWrap');
     const vid = document.getElementById('mainVid');
 
-    // 1. Set the Source with Autoplay
-    vid.src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1`;
+    // Set source with autoplay
+    vid.src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1&mute=0`;
     vid.style.display = 'block';
 
-    // 2. Create the Shields
+    // ADD THE SHIELDS (Hides the "Recorded" progress bar and download icons)
     const bShield = document.createElement('div');
     bShield.className = 'bottom-shield';
     
     const tShield = document.createElement('div');
     tShield.className = 'top-shield';
 
-    // 3. Add Shields to the Video Container
     wrap.appendChild(bShield);
     wrap.appendChild(tShield);
 }
-function showFallback(driveId){
-  document.getElementById('mainVid').style.display='none';
-  const fb=document.getElementById('driveFallback');
-  document.getElementById('driveDirectLink').href='https://drive.google.com/file/d/'+driveId+'/view';
-  fb.style.display='flex';
-}
-
-/* ADMIN */
-function openAdmin(){
-  document.getElementById('overlay').classList.add('open');
-  document.getElementById('pwWrap').style.display='block';
-  document.getElementById('adminMain').style.display='none';
-  document.getElementById('pwIn').value='';
-  document.getElementById('pwErr').style.display='none';
-  setTimeout(()=>document.getElementById('pwIn').focus(),60);
-}
-function closeAdmin(){document.getElementById('overlay').classList.remove('open')}
-function outerClick(e){if(e.target===document.getElementById('overlay'))closeAdmin()}
-function checkPw(){
-  if(document.getElementById('pwIn').value===PW){
-    document.getElementById('pwWrap').style.display='none';
-    const am=document.getElementById('adminMain');
-    am.style.display='flex';
-    loadFields(); goTab(1);
-  } else document.getElementById('pwErr').style.display='block';
-}
-function loadFields(){
-  document.getElementById('aCourse').value=S.course;
-  document.getElementById('aInstr').value=S.instructor;
-  document.getElementById('aScript').value=S.scriptUrl||'';
-  document.getElementById('aBulk').value='';
-  rebuildEd(); rebuildSel();
-}
-function goTab(n){
-  document.getElementById('tab1').style.display=n===1?'block':'none';
-  document.getElementById('tab2').style.display=n===2?'block':'none';
-  document.getElementById('setupFt').style.display=n===1?'flex':'none';
-  document.getElementById('t1').classList.toggle('on',n===1);
-  document.getElementById('t2').classList.toggle('on',n===2);
-  if(n===2){
-    document.getElementById('noScriptWarn').style.display=S.scriptUrl?'none':'block';
-    renderAtt(); updateAttStats();
-  }
-}
-
-/* CLASS EDITOR */
-function rebuildEd(){
-  const el=document.getElementById('classEd');
-  el.innerHTML='';
-  S.classes.forEach((c,i)=>el.appendChild(mkRow(c,i)));
-}
-function mkRow(c,i){
-  const d=document.createElement('div');
-  d.className='crow';
-  d.innerHTML=`<div class="crow-n">${String(i+1).padStart(2,'0')}</div>
-    <input class="crow-in" type="text" placeholder="Class ${i+1} title…" value="${esc(c.title||'')}">
-    <input class="crow-in" type="url" placeholder="Drive link…" value="${c.driveId?'https://drive.google.com/file/d/'+c.driveId+'/view':''}">
-    <button class="crow-del" onclick="delRow(${i})">✕</button>`;
-  d.querySelectorAll('input')[0].oninput=function(){S.classes[i].title=this.value;rebuildSel()};
-  d.querySelectorAll('input')[1].oninput=function(){S.classes[i].driveId=xid(this.value)||this.value};
-  return d;
-}
-function addRow(){S.classes.push({title:'',driveId:'',status:'next'});rebuildEd();rebuildSel()}
-function delRow(i){S.classes.splice(i,1);if(S.liveIdx>=S.classes.length)S.liveIdx=S.classes.length-1;rebuildEd();rebuildSel()}
-function rebuildSel(){
-  const sel=document.getElementById('aLive'),cur=sel.value;
-  sel.innerHTML='';
-  S.classes.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`Class ${i+1}${c.title?' — '+c.title:''}`;sel.appendChild(o)});
-  sel.value=cur||S.liveIdx;
-}
-function doBulk(){
-  const raw=document.getElementById('aBulk').value.trim();
-  if(!raw){toast('Paste some links first.','err');return}
-  const lines=raw.split('\n').map(l=>l.trim()).filter(Boolean).slice(0,25);
-  let added=0;
-  lines.forEach((l,i)=>{const id=xid(l);if(i<S.classes.length){if(id)S.classes[i].driveId=id;}else{S.classes.push({title:'Class '+(i+1),driveId:id||'',status:'next'});added++}});
-  rebuildEd();rebuildSel();
-  toast(`✓ ${lines.length} links imported — ${added} classes added`,'ok');
-}
-
-/* APPLY */
-function applyAll(){
-  S.course=document.getElementById('aCourse').value.trim()||S.course;
-  S.instructor=document.getElementById('aInstr').value.trim()||S.instructor;
-  S.scriptUrl=document.getElementById('aScript').value.trim();
-  S.liveIdx=parseInt(document.getElementById('aLive').value,10);
-  document.querySelectorAll('#classEd .crow').forEach((row,i)=>{
-    const ins=row.querySelectorAll('input');
-    if(S.classes[i]){S.classes[i].title=ins[0].value.trim()||'Class '+(i+1);const id=xid(ins[1].value);if(id)S.classes[i].driveId=id}
-  });
-  S.classes.forEach((c,i)=>{
-    if(!c.driveId){c.status='locked';return}
-    c.status=i<S.liveIdx?'done':i===S.liveIdx?'live':'next';
-  });
-  closeAdmin(); renderSidebar();
-  const cls=S.classes[S.liveIdx];
-  if(cls&&cls.driveId){
-    document.getElementById('liveTitle').textContent=cls.title||'Class 1';
-    document.getElementById('mbTitle').textContent=cls.title||'Class 1';
-    document.getElementById('jTitle').textContent=cls.title||'Class 1';
-  }
-  document.getElementById('mbInstr').textContent=S.instructor;
-  document.getElementById('mbCourse').textContent=S.course;
-  document.getElementById('hdrCourse').textContent=S.course;
-  document.getElementById('jSub').textContent=(S.course?S.course+' — ':'')+S.instructor;
-  // Reset join gate
-  document.getElementById('driveFallback').style.display='none';
-  document.getElementById('mainVid').src='';
-  document.getElementById('mainVid').style.display='none';
-  document.getElementById('joinGate').style.display='flex';
-  document.getElementById('jBtn').disabled=false;
-  document.getElementById('jBtn').textContent='Join Class →';
-  document.getElementById('jName').value='';
-  document.getElementById('jRoll').value='';
-  toast('✓ Session live! Students can join.','ok');
-}
-
-/* SIDEBAR */
-function renderSidebar(){
-  document.getElementById('sbCourse').textContent=S.course;
-  document.getElementById('sbInstr').textContent=S.instructor;
-  document.getElementById('hdrCourse').textContent=S.course;
-  document.getElementById('mbInstr').textContent=S.instructor;
-  document.getElementById('mbCourse').textContent=S.course;
-  const done=S.classes.filter(c=>c.status==='done').length,total=S.classes.length;
-  const pct=total?Math.round(done/total*100):0;
-  document.getElementById('sbFill').style.width=pct+'%';
-  document.getElementById('sbLbl').textContent=`${done} / ${total} classes done`;
-  document.getElementById('ppFill').style.width=pct+'%';
-  document.getElementById('ppLbl').textContent=`${done} / ${total} done`;
-  const list=document.getElementById('sbList'),empty=document.getElementById('sbEmpty');
-  list.querySelectorAll('.ci').forEach(e=>e.remove());
-  if(!S.classes.length){empty.style.display='block';return}
-  empty.style.display='none';
-  const bmap={live:'<span class="badge b-live">LIVE</span>',done:'<span class="badge b-done">Done</span>',next:'<span class="badge b-next">Upcoming</span>',locked:'<span class="badge b-lock">No video</span>'};
-  S.classes.forEach((c,i)=>{
-    const el=document.createElement('div');
-    el.className='ci'+(c.status==='live'?' active':c.status==='done'?' done':c.status==='locked'?' locked':'');
-    el.innerHTML=`<div class="ci-n">${String(i+1).padStart(2,'0')}</div><div class="ci-b"><div class="ci-t">${esc(c.title||'Class '+(i+1))}</div>${bmap[c.status]||''}</div>`;
-    if(c.status!=='locked')el.onclick=()=>switchClass(i);
-    list.insertBefore(el,empty);
-  });
-}
-function switchClass(i){
-  const c=S.classes[i];if(!c||!c.driveId)return;
-  S.liveIdx=i;
-  document.querySelectorAll('.ci').forEach((el,j)=>el.classList.toggle('active',j===i));
-  document.getElementById('liveTitle').textContent=c.title||'Class '+(i+1);
-  document.getElementById('mbTitle').textContent=c.title||'Class '+(i+1);
-  document.getElementById('jTitle').textContent=c.title||'Class '+(i+1);
-  document.getElementById('driveFallback').style.display='none';
-  document.getElementById('mainVid').src='';
-  document.getElementById('mainVid').style.display='none';
-  document.getElementById('fjoinGate').style.display='flex';
-  document.getElementById('jBtn').disabled=false;
-  document.getElementById('jBtn').textContent='Join Class →';
-}
-
-/* ATTENDANCE */
-function updateAttStats(){
-  document.getElementById('attN').textContent=roster.length;
-  document.getElementById('attLast').textContent=roster.length?roster[0].name.split(' ')[0]:'—';
-  const cls=S.classes[S.liveIdx]||S.classes[0];
-  document.getElementById('attCls').textContent=cls?(cls.title||'Class 1'):'—';
-}
-function renderAtt(){
-  updateAttStats();
-  const q=document.getElementById('attQ').value.toLowerCase();
-  const fil=roster.filter(a=>a.name.toLowerCase().includes(q)||a.roll.toLowerCase().includes(q));
-  const el=document.getElementById('attRows');
-  if(!fil.length){el.innerHTML=`<div class="att-empty">${roster.length?'No results.':'No students have joined yet.'}</div>`;return}
-  el.innerHTML='';
-  fil.forEach((a,i)=>{
-    const r=document.createElement('div');
-    r.className='arow'+(i===0&&!q?' fresh':'');
-    r.innerHTML=`<div class="arow-i">${fil.length-i}</div><div class="arow-name">${esc(a.name)}</div><div class="arow-roll">${esc(a.roll)}</div><div class="arow-time">${a.time}</div>`;
-    el.appendChild(r);
-    if(i===0&&!q)setTimeout(()=>r.classList.remove('fresh'),3000);
-  });
-}
-function clearAtt(){if(!confirm('Clear all attendance?'))return;roster=[];document.getElementById('tCount').textContent=0;renderAtt();toast('Cleared.','ok')}
-function exportCSV(){
-  if(!roster.length){toast('Nothing to export.','err');return}
-  const rows=[['#','Name','Roll Number','Class','Joined At'],...roster.map((a,i)=>[roster.length-i,a.name,a.roll,a.classTitle,a.time])];
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download=`attendance_${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.csv`;
-  a.click();
-}
 
 /* HELPERS */
-function xid(url){const m=url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);return m?m[1]:null}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function now(){return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true})}
-function toast(msg,type=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast'+(type?' '+type:'');
-  t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3200);
+function xid(url) {
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+    return match ? match[1] : null;
+}
+
+function toast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type + ' show';
+    setTimeout(() => t.classList.remove('show'), 3200);
 }
 </script>
 </body>
