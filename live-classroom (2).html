@@ -444,30 +444,37 @@ window.addEventListener('DOMContentLoaded',()=>{
 function doJoin() {
   const name = document.getElementById('jName').value.trim();
   const roll = document.getElementById('jRoll').value.trim();
-  const err = document.getElementById('jErr');
 
   if (!name || !roll) {
-    err.style.display = 'block';
+    toast('Please enter Name and Roll Number', 'err');
     return;
   }
-  err.style.display = 'none';
 
-  // THE AUTOMATIC VIDEO ID (From your link)
-  const driveId = "14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG";
+  // DIRECTLY PASTE YOUR FULL LINK HERE
+  const fullLink = "https://drive.google.com/file/d/14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG/view?usp=drive_link";
 
-  // Log attendance locally
-  const entry = {
-    name,
-    roll,
-    classTitle: "Tuesday Live Session",
-    time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-  };
+  // This "cleans" the link to get the ID automatically
+  const driveId = xid(fullLink);
+
+  if (!driveId) {
+    toast('Invalid Google Drive Link', 'err');
+    return;
+  }
+
+  // Log attendance
+  const entry = { name, roll, classTitle: "Live Session", time: new Date().toLocaleTimeString() };
   roster.unshift(entry);
   localStorage.setItem('edu_roster', JSON.stringify(roster));
 
-  // Hide the join screen and show video
+  // Hide Join Screen & Start Video
   document.getElementById('joinGate').style.display = 'none';
   showVideo(driveId);
+}
+
+// This helper ensures that even if you paste a full link, the player works
+function xid(url) {
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+  return match ? match[1] : null;
 }
 
 function showVideo(driveId) {
