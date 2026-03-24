@@ -393,7 +393,7 @@ header{height:52px;display:flex;align-items:center;justify-content:space-between
 const PW = "admin123";
 let S = {
   course:"My Course", instructor:"Instructor", scriptUrl:"",
-  classes:[{title:"Class 1",driveId:"14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG",status:"live"}],
+  classes:[{title:"Class 1",driveId:"",status:"live"}],
   liveIdx:0
 };
 let roster = [];
@@ -424,24 +424,49 @@ function doJoin(){
   if(S.scriptUrl){
     fetch(S.scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)}).catch(()=>{});
   }
-  const driveId = (S.classes[S.liveIdx]||S.classes[0]||{}).driveId || '14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG';
+  const videoUrl = (S.classes[S.liveIdx]||S.classes[0]||{}).driveId || '';
   document.getElementById('joinGate').style.display='none';
-  showVideo(driveId);
+  showVideo(videoUrl);
   toast('Welcome '+name+'! Enjoy the class.','ok');
 }
 
-function showVideo(driveId){
+/* Parse any YouTube or Drive URL into an embed URL */
+function parseVideo(raw){
+  raw=(raw||'').trim();
+  // YouTube: youtu.be/ID  |  youtube.com/watch?v=ID  |  youtube.com/embed/ID
+  let m=raw.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  if(m) return {type:'yt', embed:'https://www.youtube.com/embed/'+m[1]+'?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&disablekb=1', direct:'https://youtu.be/'+m[1]};
+  // Google Drive: /d/ID/
+  m=raw.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+  if(m) return {type:'drive', embed:'https://drive.google.com/file/d/'+m[1]+'/preview?autoplay=1', direct:'https://drive.google.com/file/d/'+m[1]+'/view'};
+  return null;
+}
+
+function showVideo(raw){
   const vid = document.getElementById('mainVid');
-  vid.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
+  const parsed = parseVideo(raw);
+  if(!parsed){
+    // No valid URL — show fallback immediately
+    showFallback(raw); return;
+  }
+  vid.src = parsed.embed;
   vid.style.display = 'block';
-  document.getElementById('topBlock').style.display = 'block';
-  document.getElementById('bottomBlock').style.display = 'block';
-  setTimeout(()=>{
-    try{
-      const doc=vid.contentDocument;
-      if(doc&&doc.body&&doc.body.innerHTML.length<300) showFallback(driveId);
-    }catch(e){}
-  },4500);
+  if(parsed.type==='drive'){
+    // Drive needs the overlay blocks to hide its control bar
+    document.getElementById('topBlock').style.display='block';
+    document.getElementById('bottomBlock').style.display='block';
+    // Also check for Drive blocking error after a delay
+    setTimeout(()=>{
+      try{
+        const doc=vid.contentDocument;
+        if(doc&&doc.body&&doc.body.innerHTML.length<300) showFallback(raw);
+      }catch(e){}
+    },4500);
+  } else {
+    // YouTube controls=0 hides the bar natively — no blocks needed
+    document.getElementById('topBlock').style.display='none';
+    document.getElementById('bottomBlock').style.display='none';
+  }
 }
 
 function showFallback(driveId){
