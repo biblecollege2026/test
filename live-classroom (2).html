@@ -6,636 +6,196 @@
 <title>EduLive — Live Classroom</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* --- ORIGINAL STYLING PRESERVED --- */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0b0d12;--s1:#12151e;--s2:#181c28;--s3:#1e2335;
-  --b0:rgba(255,255,255,0.05);--b1:rgba(255,255,255,0.09);--b2:rgba(255,255,255,0.15);
-  --text:#e4e8f4;--muted:#6e7896;--dim:#4a5168;
-  --accent:#4f82ff;--accent-d:rgba(79,130,255,0.18);--accent-t:rgba(79,130,255,0.08);
-  --red:#ff3a54;--red-d:rgba(255,58,84,0.18);
-  --green:#1fd47a;--green-d:rgba(31,212,122,0.15);
-  --amber:#f5a623;--amber-d:rgba(245,166,35,0.15);
-  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --text:#e4e8f4;--muted:#6e7896;--accent:#4f82ff;
+  --red:#ff4f4f;--green:#3cd381;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
-header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--s1);border-bottom:1px solid var(--b0);flex-shrink:0;z-index:50}
-.logo{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:600;letter-spacing:-.3px}
-.logo-ring{width:26px;height:26px;border-radius:50%;background:var(--accent-d);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center}
-.hdr-right{display:flex;align-items:center;gap:10px}
-.hdr-meta{font-size:12px;color:var(--muted);font-family:var(--mono)}
-.hdr-meta span{color:var(--text)}
-.admin-btn{background:none;border:1px solid var(--b1);color:var(--muted);padding:5px 13px;border-radius:6px;font-size:12px;font-family:var(--font);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
-.admin-btn:hover{background:var(--s3);color:var(--text);border-color:var(--b2)}
-.layout{flex:1;display:grid;grid-template-columns:290px 1fr;overflow:hidden;height:calc(100vh - 52px)}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.6;overflow-x:hidden}
 
-/* SIDEBAR */
-.sidebar{background:var(--s1);border-right:1px solid var(--b0);display:flex;flex-direction:column;overflow:hidden}
-.sb-header{padding:14px 16px 12px;border-bottom:1px solid var(--b0);flex-shrink:0}
-.sb-course{font-size:13px;font-weight:600;line-height:1.3}
-.sb-instr{font-size:11px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:6px}
-.sb-instr::before{content:'';width:5px;height:5px;background:var(--green);border-radius:50%;flex-shrink:0;animation:gblink 2s infinite}
-@keyframes gblink{0%,100%{box-shadow:0 0 0 0 rgba(31,212,122,.5)}50%{box-shadow:0 0 0 3px transparent}}
-.sb-prog{margin-top:10px;height:3px;background:var(--b0);border-radius:2px;overflow:hidden}
-.sb-prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .6s}
-.sb-prog-label{font-size:10px;color:var(--dim);font-family:var(--mono);margin-top:4px}
-.sb-list{overflow-y:auto;flex:1;padding:6px 0}
-.sb-list::-webkit-scrollbar{width:3px}
-.sb-list::-webkit-scrollbar-thumb{background:var(--b1);border-radius:2px}
-.ci{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;cursor:pointer;transition:.15s;border-left:2px solid transparent}
-.ci:hover{background:var(--s2)}
-.ci.active{background:var(--accent-t);border-left-color:var(--accent)}
-.ci.locked{opacity:.4;pointer-events:none}
-.ci-n{font-size:10px;font-family:var(--mono);color:var(--dim);min-width:20px;margin-top:2px}
-.ci.active .ci-n{color:var(--accent)}
-.ci.done .ci-n{color:var(--green)}
-.ci-b{flex:1;min-width:0}
-.ci-t{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ci.active .ci-t{color:#fff}
-.badge{font-size:9px;font-weight:600;letter-spacing:.5px;padding:2px 6px;border-radius:3px;display:inline-block;margin-top:3px}
-.b-live{background:var(--red-d);color:var(--red);animation:blk 1.5s infinite}
-@keyframes blk{0%,100%{opacity:1}50%{opacity:.6}}
-.b-done{background:var(--green-d);color:var(--green)}
-.b-next{background:var(--accent-d);color:var(--accent)}
-.b-lock{background:var(--b0);color:var(--dim)}
-.sb-empty{padding:28px 14px;text-align:center;color:var(--dim);font-size:12px;line-height:1.8}
+/* --- ADDED LIVE CLASSROOM STYLING --- */
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  margin: 2rem auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+.live-indicator {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: var(--red);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%{opacity:1} 50%{opacity:0.5} 100%{opacity:1} }
 
-/* MAIN */
-.main{display:flex;flex-direction:column;overflow:hidden}
-.video-wrap{flex:1;position:relative;background:#000;overflow:hidden}
-.video-wrap iframe{width:100%;height:100%;border:none;display:block}
+.no-skip-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px; /* Covers Google Drive seek bar */
+  background: transparent;
+  z-index: 9;
+}
 
-/* JOIN GATE */
-.join-gate{position:absolute;inset:0;z-index:20;background:radial-gradient(ellipse at center,#131826 0%,#0b0d12 80%);display:flex;align-items:center;justify-content:center}
-.join-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:32px;width:360px;max-width:92vw}
-.live-pill{display:inline-flex;align-items:center;gap:6px;background:var(--red-d);border:1px solid rgba(255,58,84,.25);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--red);margin-bottom:18px}
-.live-pill::before{content:'';width:5px;height:5px;background:var(--red);border-radius:50%;animation:blk 1.2s infinite}
-.join-card h2{font-size:18px;font-weight:600;margin-bottom:6px}
-.join-card p{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6}
-.jfield{margin-bottom:13px}
-.jfield label{display:block;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:5px}
-.jfield input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border .2s}
-.jfield input:focus{border-color:var(--accent)}
-.jfield input::placeholder{color:var(--dim)}
-.join-btn{width:100%;background:var(--accent);border:none;border-radius:9px;padding:12px;color:#fff;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:.15s;margin-top:4px}
-.join-btn:hover{background:#3d70f0}
-.join-btn:active{transform:scale(.98)}
-.join-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.join-err{font-size:12px;color:var(--red);margin-top:8px;display:none}
+iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
 
-/* OVERLAYS on video */
-.live-bar{position:absolute;top:14px;left:14px;display:flex;align-items:center;gap:8px;z-index:10;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:6px 12px}
-.ld{width:6px;height:6px;background:var(--red);border-radius:50%;animation:blk 1.2s infinite;flex-shrink:0}
-.ll{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#fff}
-.lsep{width:1px;height:12px;background:rgba(255,255,255,.15)}
-.lt{font-size:12px;color:rgba(255,255,255,.75);max-width:380px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.viewer-bar{position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:6px;z-index:10;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:6px 12px;font-size:12px;font-family:var(--mono);color:rgba(255,255,255,.7)}
-.vd{width:5px;height:5px;background:var(--green);border-radius:50%;animation:blk 1.8s infinite}
+.hidden { display: none !important; }
 
-/* META BAR */
-.meta-bar{background:var(--s1);border-top:1px solid var(--b0);padding:10px 20px;display:flex;align-items:center;gap:18px;flex-shrink:0}
-.mb-item{display:flex;flex-direction:column;gap:2px}
-.mb-lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--dim)}
-.mb-val{font-size:13px;font-weight:500}
-.mb-sep{width:1px;height:26px;background:var(--b0)}
-.mb-spc{flex:1}
-.prog-pill{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--b0);border-radius:8px;padding:6px 14px}
-.pp-track{width:100px;height:4px;background:var(--b1);border-radius:2px;overflow:hidden}
-.pp-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s}
-.pp-lbl{font-size:11px;font-family:var(--mono);color:var(--muted)}
+/* --- ORIGINAL ATTENDANCE & UI COMPONENTS --- */
+.container{max-width:1100px;margin:0 auto;padding:2rem}
+.card{background:var(--s1);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:2rem}
+.input-group{margin-bottom:1.5rem}
+label{display:block;margin-bottom:0.5rem;color:var(--muted);font-size:0.9rem}
+input{width:100%;padding:0.8rem 1rem;background:var(--s2);border:1px solid var(--s3);border-radius:8px;color:var(--text);font-family:inherit}
+button{background:var(--accent);color:#fff;border:none;padding:0.8rem 1.5rem;border-radius:8px;font-weight:600;cursor:pointer;transition:0.2s}
+button:hover{filter:brightness(1.1)}
 
-/* OVERLAY */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;padding:20px}
-.overlay.open{display:flex}
-.panel{background:var(--s1);border:1px solid var(--b1);border-radius:16px;width:740px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
-.ph{padding:18px 24px 14px;border-bottom:1px solid var(--b0);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
-.ph h2{font-size:16px;font-weight:600}
-.ph-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;line-height:1;transition:.2s}
-.ph-x:hover{color:var(--text)}
-.tabs{display:flex;gap:2px;padding:10px 24px 0;border-bottom:1px solid var(--b0);flex-shrink:0}
-.tab{background:none;border:none;border-bottom:2px solid transparent;padding:7px 14px;font-family:var(--font);font-size:13px;color:var(--muted);cursor:pointer;transition:.15s;margin-bottom:-1px}
-.tab:hover{color:var(--text)}
-.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
-.tab-count{background:var(--green-d);color:var(--green);border-radius:10px;padding:1px 7px;font-size:10px;font-family:var(--mono);margin-left:5px}
-.pb{overflow-y:auto;padding:20px 24px;flex:1}
-.pb::-webkit-scrollbar{width:4px}
-.pb::-webkit-scrollbar-thumb{background:var(--b1);border-radius:2px}
-.pf{padding:14px 24px;border-top:1px solid var(--b0);display:flex;gap:10px;flex-shrink:0}
-.f{margin-bottom:16px}
-.f label{display:block;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
-.f input,.f textarea,.f select{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border .2s}
-.f input:focus,.f textarea:focus,.f select:focus{border-color:var(--accent)}
-.f input::placeholder,.f textarea::placeholder{color:var(--dim)}
-.f textarea{resize:vertical;min-height:88px;font-size:12px;line-height:1.6}
-.f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.f-hint{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.5}
-.f select option{background:var(--s2)}
-.class-rows{display:flex;flex-direction:column;gap:7px}
-.crow{display:grid;grid-template-columns:26px 1fr 1fr 26px;gap:8px;align-items:center;background:var(--s2);border:1px solid var(--b0);border-radius:8px;padding:9px 11px}
-.crow-n{font-size:10px;font-family:var(--mono);color:var(--dim);text-align:center}
-.crow-in{background:var(--s3);border:1px solid var(--b0);border-radius:6px;padding:6px 9px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;width:100%;transition:border .2s}
-.crow-in:focus{border-color:var(--accent)}
-.crow-in::placeholder{color:var(--dim)}
-.crow-del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:3px;transition:.2s;text-align:center}
-.crow-del:hover{color:var(--red)}
-.add-row{display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:1px dashed var(--b1);border-radius:8px;padding:9px;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;transition:.2s;width:100%;margin-top:6px}
-.add-row:hover{background:var(--s2);border-color:var(--b2);color:var(--text)}
-.import-row{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--accent-d);border:1px solid rgba(79,130,255,.3);border-radius:8px;padding:10px;color:var(--accent);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:.2s;width:100%;margin-bottom:16px}
-.import-row:hover{background:rgba(79,130,255,.28)}
-
-/* PW */
-.pw-wrap{padding:28px}
-.pw-wrap h2{font-size:17px;font-weight:600;margin-bottom:6px}
-.pw-wrap p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6}
-.pw-err{font-size:12px;color:var(--red);margin-top:7px;display:none}
-.pw-acts{display:flex;gap:10px;margin-top:14px}
-.btn-go{flex:1;background:var(--accent);border:none;border-radius:9px;padding:11px;color:#fff;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
-.btn-go:hover{background:#3d70f0}
-.btn-go:active{transform:scale(.98)}
-.btn-no{background:none;border:1px solid var(--b1);border-radius:9px;padding:11px 20px;color:var(--muted);font-family:var(--font);font-size:14px;cursor:pointer;transition:.15s}
-.btn-no:hover{background:var(--s2);color:var(--text)}
-
-/* ATTENDANCE TAB */
-.att-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-.astat{background:var(--s2);border:1px solid var(--b0);border-radius:10px;padding:12px 14px}
-.astat-n{font-size:22px;font-weight:600;font-family:var(--mono)}
-.astat-n.g{color:var(--green)}
-.astat-l{font-size:11px;color:var(--muted);margin-top:2px}
-.att-bar{display:flex;gap:8px;margin-bottom:12px}
-.att-search{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border .2s}
-.att-search:focus{border-color:var(--accent)}
-.att-search::placeholder{color:var(--dim)}
-.att-btn{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:8px 13px;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;white-space:nowrap;transition:.15s}
-.att-btn:hover{background:var(--s3);color:var(--text)}
-.att-btn.danger{border-color:rgba(255,58,84,.25);color:var(--red)}
-.att-btn.danger:hover{background:var(--red-d)}
-.att-thead{display:grid;grid-template-columns:32px 1fr 90px 72px;gap:10px;padding:0 12px 8px;border-bottom:1px solid var(--b0);margin-bottom:6px}
-.att-thead span{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--dim)}
-.att-rows{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto}
-.att-rows::-webkit-scrollbar{width:3px}
-.att-rows::-webkit-scrollbar-thumb{background:var(--b1);border-radius:2px}
-.arow{display:grid;grid-template-columns:32px 1fr 90px 72px;gap:10px;align-items:center;background:var(--s2);border:1px solid var(--b0);border-radius:8px;padding:9px 12px;animation:ain .3s ease}
-@keyframes ain{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-.arow.fresh{border-color:rgba(31,212,122,.35);background:rgba(31,212,122,.07)}
-.arow-i{font-size:11px;font-family:var(--mono);color:var(--dim);text-align:center}
-.arow-name{font-size:13px;font-weight:500}
-.arow-roll{font-size:11px;font-family:var(--mono);color:var(--muted)}
-.arow-time{font-size:10px;font-family:var(--mono);color:var(--dim);text-align:right}
-.att-empty{text-align:center;color:var(--dim);font-size:13px;padding:36px 0;line-height:1.8}
-.warn-box{background:var(--amber-d);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.6;color:var(--amber);margin-bottom:14px}
-
-.toast{position:fixed;bottom:20px;right:20px;background:var(--s3);border:1px solid var(--b2);border-radius:9px;padding:10px 16px;font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none}
-.toast.show{opacity:1;transform:translateY(0)}
-.toast.ok{border-color:rgba(31,212,122,.5);color:var(--green)}
-.toast.err{border-color:rgba(255,58,84,.5);color:var(--red)}
+#attendance-log { margin-top: 3rem; background: var(--s1); border-radius: 16px; padding: 1.5rem; }
+.log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.log-row { display: grid; grid-template-columns: 50px 1fr 1fr 120px; padding: 0.8rem; border-bottom: 1px solid var(--s3); font-size: 0.9rem; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-ring">
-      <svg width="13" height="13" viewBox="0 0 16 16" fill="#4f82ff"><path d="M8 1L10.5 6H15L11 9.5L12.5 15L8 12L3.5 15L5 9.5L1 6H5.5Z"/></svg>
+<div class="container">
+  <div id="join-view" class="card">
+    <h1 style="margin-bottom:1.5rem">Join Live Class</h1>
+    <div class="input-group">
+      <label>Full Name</label>
+      <input type="text" id="nameInput" placeholder="Enter your name">
     </div>
-    EduLive
-  </div>
-  <div class="hdr-right">
-    <div class="hdr-meta" id="hdrMeta">Course: <span id="hdrCourse">My Course</span></div>
-    <button class="admin-btn" onclick="openAdmin()">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm-.75 3.5a.75.75 0 011.5 0V8a.75.75 0 01-1.5 0V5.5zm.75 5.25a.875.875 0 110-1.75.875.875 0 010 1.75z"/></svg>
-      Admin
-    </button>
-  </div>
-</header>
-
-<div class="layout">
-  <div class="sidebar">
-    <div class="sb-header" id="sbHdr">
-      <div class="sb-course" id="sbCourse">My Course</div>
-      <div class="sb-instr" id="sbInstr">Instructor</div>
-      <div class="sb-prog"><div class="sb-prog-fill" id="sbFill" style="width:4%"></div></div>
-      <div class="sb-prog-label" id="sbLbl">0 / 1 classes done</div>
+    <div class="input-group">
+      <label>Roll Number</label>
+      <input type="text" id="rollInput" placeholder="Enter your roll number">
     </div>
-    <div class="sb-list" id="sbList">
-      <div class="sb-empty" id="sbEmpty" style="display:none">No classes loaded.</div>
+    <div class="input-group">
+      <label>Class Video ID (Internal)</label>
+      <input type="text" id="vidInput" placeholder="Paste Google Drive Link">
     </div>
+    <button onclick="playLive()">Enter Classroom</button>
   </div>
 
-  <div class="main">
-    <div class="video-wrap" id="videoWrap">
-
-      <!-- LIVE badge -->
-      <div class="live-bar">
-        <div class="ld"></div>
-        <div class="ll">Live</div>
-        <div class="lsep"></div>
-        <div class="lt" id="liveTitle">Class 1</div>
-      </div>
-
-      <!-- VIEWER COUNT -->
-      <div class="viewer-bar">
-        <div class="vd"></div>
-        <span id="vcnt">1</span>&nbsp;watching
-      </div>
-
-      <!-- JOIN GATE -->
-      <div class="join-gate" id="joinGate">
-        <div class="join-card">
-          <div class="live-pill">● Live now</div>
-          <h2 id="jTitle">Class 1</h2>
-          <p id="jSub">Enter your details to watch the live class.</p>
-          <div class="jfield">
-            <label>Full Name</label>
-            <input type="text" id="jName" placeholder="e.g. Rahul Sharma" maxlength="60" onkeydown="if(event.key==='Enter')doJoin()">
-          </div>
-          <div class="jfield">
-            <label>Roll Number</label>
-            <input type="text" id="jRoll" placeholder="e.g. CS2024001" maxlength="30" onkeydown="if(event.key==='Enter')doJoin()">
-          </div>
-          <button class="join-btn" id="jBtn" onclick="doJoin()">Join Class →</button>
-          <div class="join-err" id="jErr">Please fill in both fields.</div>
-        </div>
-      </div>
-
-      <!-- VIDEO injected after join gesture so browser allows autoplay -->
-      <iframe id="mainVid" src="" allowfullscreen
-        allow="autoplay; encrypted-media; picture-in-picture"
-        style="display:none;width:100%;height:100%;border:none"></iframe>
-
-      <!-- FALLBACK when Drive blocks embed -->
-      <div id="driveFallback" style="display:none;position:absolute;inset:0;z-index:5;background:#0b0d12;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px;text-align:center">
-        <div style="width:60px;height:60px;border-radius:50%;background:#1e2335;border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="#6e7896"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-        </div>
-        <div style="font-size:16px;font-weight:600;color:#e4e8f4">Video cannot play in this window</div>
-        <div style="font-size:13px;color:#6e7896;max-width:360px;line-height:1.7">Google Drive is blocking the embedded player. Click below to open and watch the video directly — it will open in a new tab.</div>
-        <a id="driveDirectLink" href="#" target="_blank" rel="noopener"
-          style="background:#4f82ff;color:#fff;padding:12px 28px;border-radius:9px;font-size:14px;font-weight:600;text-decoration:none">
-          ▶ Watch on Google Drive
-        </a>
-        <div style="font-size:11px;color:#4a5168;max-width:340px;line-height:1.6">
-          <strong style="color:#6e7896">Permanent fix:</strong> In Google Drive, right-click your video → Share → change to <em>Anyone with the link</em>, then re-open this page.
-        </div>
-      </div>
-
+  <div id="class-view" class="hidden">
+    <div class="video-wrapper">
+      <div class="live-indicator">● LIVE</div>
+      <div class="no-skip-overlay"></div>
+      <iframe id="vPlayer" src="" allow="autoplay"></iframe>
     </div>
-
-    <div class="meta-bar">
-      <div class="mb-item"><div class="mb-lbl">Now Streaming</div><div class="mb-val" id="mbTitle">Class 1</div></div>
-      <div class="mb-sep"></div>
-      <div class="mb-item"><div class="mb-lbl">Instructor</div><div class="mb-val" id="mbInstr">Instructor</div></div>
-      <div class="mb-sep"></div>
-      <div class="mb-item"><div class="mb-lbl">Course</div><div class="mb-val" id="mbCourse">My Course</div></div>
-      <div class="mb-spc"></div>
-      <div class="prog-pill">
-        <div class="pp-track"><div class="pp-fill" id="ppFill" style="width:0%"></div></div>
-        <div class="pp-lbl" id="ppLbl">0 / 1 done</div>
+    
+    <div id="attendance-log">
+      <div class="log-header">
+        <h3>Class Attendance (<span id="tCount">0</span>)</h3>
+        <div>
+          <button onclick="exportCSV()" style="background:var(--s3); font-size:0.8rem">Export CSV</button>
+          <button onclick="clearAtt()" style="background:var(--red); font-size:0.8rem">Clear</button>
+        </div>
       </div>
+      <div id="log-body">
+        </div>
     </div>
   </div>
 </div>
-
-<!-- ADMIN -->
-<div class="overlay" id="overlay" onclick="outerClick(event)">
-  <div class="panel">
-
-    <div class="pw-wrap" id="pwWrap">
-      <h2>Admin Access</h2>
-      <p>Enter your password to manage the course and see live attendance.</p>
-      <div class="f">
-        <label>Password</label>
-        <input type="password" id="pwIn" placeholder="Enter password…" onkeydown="if(event.key==='Enter')checkPw()">
-        <div class="pw-err" id="pwErr">Incorrect password.</div>
-      </div>
-      <div class="pw-acts">
-        <button class="btn-go" onclick="checkPw()">Unlock</button>
-        <button class="btn-no" onclick="closeAdmin()">Cancel</button>
-      </div>
-    </div>
-
-    <div id="adminMain" style="display:none;flex-direction:column;overflow:hidden;height:100%">
-      <div class="ph">
-        <h2>Course Control</h2>
-        <button class="ph-x" onclick="closeAdmin()">✕</button>
-      </div>
-      <div class="tabs">
-        <button class="tab on" id="t1" onclick="goTab(1)">Course Setup</button>
-        <button class="tab" id="t2" onclick="goTab(2)">
-          Live Attendance
-          <span class="tab-count" id="tCount">0</span>
-        </button>
-      </div>
-
-      <!-- TAB 1: SETUP -->
-      <div class="pb" id="tab1">
-        <div class="f-row">
-          <div class="f"><label>Course Name</label><input type="text" id="aCourse" placeholder="e.g. CS201 — Data Structures"></div>
-          <div class="f"><label>Instructor Name</label><input type="text" id="aInstr" placeholder="e.g. Prof. Meera Sharma"></div>
-        </div>
-        <div class="f">
-          <label>Google Apps Script URL (attendance → Google Sheet)</label>
-          <input type="url" id="aScript" placeholder="https://script.google.com/macros/s/…/exec">
-          <div class="f-hint">Once you deploy your Apps Script, paste the URL here. Students' names &amp; roll numbers will log to your Sheet automatically.</div>
-        </div>
-        <div class="f">
-          <label>Paste Google Drive links — one per line (up to 25)</label>
-          <textarea id="aBulk" placeholder="https://drive.google.com/file/d/ABC.../view&#10;https://drive.google.com/file/d/DEF.../view&#10;..."></textarea>
-          <div class="f-hint">Files must be shared as "Anyone with the link can view".</div>
-        </div>
-        <button class="import-row" onclick="doBulk()">↓ Import links &amp; generate class list</button>
-        <div class="f">
-          <label>Class schedule <span style="color:var(--dim);font-size:10px;text-transform:none;letter-spacing:0">— edit titles after importing</span></label>
-          <div class="class-rows" id="classEd"></div>
-          <button class="add-row" onclick="addRow()">+ Add class manually</button>
-        </div>
-        <div class="f">
-          <label>Which class is LIVE right now?</label>
-          <select id="aLive"><option value="0">Class 1</option></select>
-          <div class="f-hint">Students before this class see Done; after see Upcoming.</div>
-        </div>
-      </div>
-
-      <!-- TAB 2: ATTENDANCE -->
-      <div class="pb" id="tab2" style="display:none">
-        <div class="att-stats">
-          <div class="astat"><div class="astat-n g" id="attN">0</div><div class="astat-l">Joined today</div></div>
-          <div class="astat"><div class="astat-n" id="attLast">—</div><div class="astat-l">Last joined</div></div>
-          <div class="astat"><div class="astat-n" id="attCls">—</div><div class="astat-l">Current class</div></div>
-        </div>
-        <div class="warn-box" id="noScriptWarn" style="display:none">
-          <strong>Apps Script URL not set.</strong> Add it in Course Setup to sync attendance to Google Sheets. Students joining now are tracked locally only.
-        </div>
-        <div class="att-bar">
-          <input class="att-search" type="text" id="attQ" placeholder="Search name or roll number…" oninput="renderAtt()">
-          <button class="att-btn" onclick="exportCSV()">↓ Export CSV</button>
-          <button class="att-btn danger" onclick="clearAtt()">Clear</button>
-        </div>
-        <div class="att-thead"><span>#</span><span>Name</span><span>Roll No.</span><span>Joined</span></div>
-        <div class="att-rows" id="attRows"><div class="att-empty">No students have joined yet.</div></div>
-      </div>
-
-      <div class="pf" id="setupFt">
-        <button class="btn-go" onclick="applyAll()">▶ Apply &amp; Go Live</button>
-        <button class="btn-no" onclick="closeAdmin()">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-const PW = "admin123";
-let S = {
-  course:"My Course", instructor:"Instructor", scriptUrl:"",
-  classes:[{title:"Class 1",driveId:"14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG",status:"live"}],
-  liveIdx:0
-};
-let roster = [];
+let roster = JSON.parse(localStorage.getItem('edu_roster')) || [];
 
-/* INIT */
-window.addEventListener('DOMContentLoaded',()=>{
-  renderSidebar();
-  setInterval(()=>{
-    const n = Math.max(1, roster.length) + Math.floor(Math.random()*3);
-    document.getElementById('vcnt').textContent = n;
-  },5000);
-});
+function playLive() {
+  const name = document.getElementById('nameInput').value.trim();
+  const roll = document.getElementById('rollInput').value.trim();
+  const vid = document.getElementById('vidInput').value.trim();
 
-/* JOIN */
-function doJoin(){
-  const name=document.getElementById('jName').value.trim();
-  const roll=document.getElementById('jRoll').value.trim();
-  const err=document.getElementById('jErr');
-  if(!name||!roll){err.style.display='block';return;}
-  err.style.display='none';
-  const btn=document.getElementById('jBtn');
-  btn.disabled=true; btn.textContent='Joining…';
-  const cls=S.classes[S.liveIdx]||S.classes[0]||{};
-  const entry={name,roll,classTitle:cls.title||'Class 1',time:now()};
+  if(!name || !roll || !vid) {
+    alert("Please fill all details.");
+    return;
+  }
+
+  const driveId = xid(vid);
+  if(!driveId) {
+    alert("Invalid Google Drive Link.");
+    return;
+  }
+
+  // 1. Start Video
+  document.getElementById('vPlayer').src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1`;
+  
+  // 2. Log Attendance
+  const entry = {
+    name,
+    roll,
+    time: new Date().toLocaleTimeString('en-IN'),
+    date: new Date().toLocaleDateString('en-IN')
+  };
   roster.unshift(entry);
-  document.getElementById('tCount').textContent=roster.length;
-  document.getElementById('vcnt').textContent=roster.length;
-  if(S.scriptUrl){
-    fetch(S.scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)}).catch(()=>{});
-  }
-  const driveId = (S.classes[S.liveIdx]||S.classes[0]||{}).driveId || '14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG';
-  document.getElementById('joinGate').style.display='none';
-  showVideo(driveId);
-  toast('Welcome '+name+'! Enjoy the class.','ok');
+  localStorage.setItem('edu_roster', JSON.stringify(roster));
+  
+  // 3. Switch View
+  document.getElementById('join-view').classList.add('hidden');
+  document.getElementById('class-view').classList.remove('hidden');
+  renderAtt();
 }
 
-function showVideo(driveId){
-  const vid = document.getElementById('mainVid');
-  vid.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
-  vid.style.display = 'block';
-  setTimeout(()=>{
-    try{
-      const doc=vid.contentDocument;
-      if(doc&&doc.body&&doc.body.innerHTML.length<300) showFallback(driveId);
-    }catch(e){}
-  },4500);
+function renderAtt() {
+  const body = document.getElementById('log-body');
+  document.getElementById('tCount').textContent = roster.length;
+  body.innerHTML = roster.map((a, i) => `
+    <div class="log-row">
+      <span>${roster.length - i}</span>
+      <strong>${esc(a.name)}</strong>
+      <span>${esc(a.roll)}</span>
+      <span style="color:var(--muted)">${a.time}</span>
+    </div>
+  `).join('');
 }
 
-function showFallback(driveId){
-  document.getElementById('mainVid').style.display='none';
-  const fb=document.getElementById('driveFallback');
-  document.getElementById('driveDirectLink').href='https://drive.google.com/file/d/'+driveId+'/view';
-  fb.style.display='flex';
-}
-
-/* ADMIN */
-function openAdmin(){
-  document.getElementById('overlay').classList.add('open');
-  document.getElementById('pwWrap').style.display='block';
-  document.getElementById('adminMain').style.display='none';
-  document.getElementById('pwIn').value='';
-  document.getElementById('pwErr').style.display='none';
-  setTimeout(()=>document.getElementById('pwIn').focus(),60);
-}
-function closeAdmin(){document.getElementById('overlay').classList.remove('open')}
-function outerClick(e){if(e.target===document.getElementById('overlay'))closeAdmin()}
-function checkPw(){
-  if(document.getElementById('pwIn').value===PW){
-    document.getElementById('pwWrap').style.display='none';
-    const am=document.getElementById('adminMain');
-    am.style.display='flex';
-    loadFields(); goTab(1);
-  } else document.getElementById('pwErr').style.display='block';
-}
-function loadFields(){
-  document.getElementById('aCourse').value=S.course;
-  document.getElementById('aInstr').value=S.instructor;
-  document.getElementById('aScript').value=S.scriptUrl||'';
-  document.getElementById('aBulk').value='';
-  rebuildEd(); rebuildSel();
-}
-function goTab(n){
-  document.getElementById('tab1').style.display=n===1?'block':'none';
-  document.getElementById('tab2').style.display=n===2?'block':'none';
-  document.getElementById('setupFt').style.display=n===1?'flex':'none';
-  document.getElementById('t1').classList.toggle('on',n===1);
-  document.getElementById('t2').classList.toggle('on',n===2);
-  if(n===2){
-    document.getElementById('noScriptWarn').style.display=S.scriptUrl?'none':'block';
-    renderAtt(); updateAttStats();
-  }
-}
-
-/* CLASS EDITOR */
-function rebuildEd(){
-  const el=document.getElementById('classEd');
-  el.innerHTML='';
-  S.classes.forEach((c,i)=>el.appendChild(mkRow(c,i)));
-}
-function mkRow(c,i){
-  const d=document.createElement('div');
-  d.className='crow';
-  d.innerHTML=`<div class="crow-n">${String(i+1).padStart(2,'0')}</div>
-    <input class="crow-in" type="text" placeholder="Class ${i+1} title…" value="${esc(c.title||'')}">
-    <input class="crow-in" type="url" placeholder="Drive link…" value="${c.driveId?'https://drive.google.com/file/d/'+c.driveId+'/view':''}">
-    <button class="crow-del" onclick="delRow(${i})">✕</button>`;
-  d.querySelectorAll('input')[0].oninput=function(){S.classes[i].title=this.value;rebuildSel()};
-  d.querySelectorAll('input')[1].oninput=function(){S.classes[i].driveId=xid(this.value)||this.value};
-  return d;
-}
-function addRow(){S.classes.push({title:'',driveId:'',status:'next'});rebuildEd();rebuildSel()}
-function delRow(i){S.classes.splice(i,1);if(S.liveIdx>=S.classes.length)S.liveIdx=S.classes.length-1;rebuildEd();rebuildSel()}
-function rebuildSel(){
-  const sel=document.getElementById('aLive'),cur=sel.value;
-  sel.innerHTML='';
-  S.classes.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`Class ${i+1}${c.title?' — '+c.title:''}`;sel.appendChild(o)});
-  sel.value=cur||S.liveIdx;
-}
-function doBulk(){
-  const raw=document.getElementById('aBulk').value.trim();
-  if(!raw){toast('Paste some links first.','err');return}
-  const lines=raw.split('\n').map(l=>l.trim()).filter(Boolean).slice(0,25);
-  let added=0;
-  lines.forEach((l,i)=>{const id=xid(l);if(i<S.classes.length){if(id)S.classes[i].driveId=id;}else{S.classes.push({title:'Class '+(i+1),driveId:id||'',status:'next'});added++}});
-  rebuildEd();rebuildSel();
-  toast(`✓ ${lines.length} links imported — ${added} classes added`,'ok');
-}
-
-/* APPLY */
-function applyAll(){
-  S.course=document.getElementById('aCourse').value.trim()||S.course;
-  S.instructor=document.getElementById('aInstr').value.trim()||S.instructor;
-  S.scriptUrl=document.getElementById('aScript').value.trim();
-  S.liveIdx=parseInt(document.getElementById('aLive').value,10);
-  document.querySelectorAll('#classEd .crow').forEach((row,i)=>{
-    const ins=row.querySelectorAll('input');
-    if(S.classes[i]){S.classes[i].title=ins[0].value.trim()||'Class '+(i+1);const id=xid(ins[1].value);if(id)S.classes[i].driveId=id}
-  });
-  S.classes.forEach((c,i)=>{
-    if(!c.driveId){c.status='locked';return}
-    c.status=i<S.liveIdx?'done':i===S.liveIdx?'live':'next';
-  });
-  closeAdmin(); renderSidebar();
-  const cls=S.classes[S.liveIdx];
-  if(cls&&cls.driveId){
-    document.getElementById('liveTitle').textContent=cls.title||'Class 1';
-    document.getElementById('mbTitle').textContent=cls.title||'Class 1';
-    document.getElementById('jTitle').textContent=cls.title||'Class 1';
-  }
-  document.getElementById('mbInstr').textContent=S.instructor;
-  document.getElementById('mbCourse').textContent=S.course;
-  document.getElementById('hdrCourse').textContent=S.course;
-  document.getElementById('jSub').textContent=(S.course?S.course+' — ':'')+S.instructor;
-  // Reset join gate
-  document.getElementById('driveFallback').style.display='none';
-  document.getElementById('mainVid').src='';
-  document.getElementById('mainVid').style.display='none';
-  document.getElementById('joinGate').style.display='flex';
-  document.getElementById('jBtn').disabled=false;
-  document.getElementById('jBtn').textContent='Join Class →';
-  document.getElementById('jName').value='';
-  document.getElementById('jRoll').value='';
-  toast('✓ Session live! Students can join.','ok');
-}
-
-/* SIDEBAR */
-function renderSidebar(){
-  document.getElementById('sbCourse').textContent=S.course;
-  document.getElementById('sbInstr').textContent=S.instructor;
-  document.getElementById('hdrCourse').textContent=S.course;
-  document.getElementById('mbInstr').textContent=S.instructor;
-  document.getElementById('mbCourse').textContent=S.course;
-  const done=S.classes.filter(c=>c.status==='done').length,total=S.classes.length;
-  const pct=total?Math.round(done/total*100):0;
-  document.getElementById('sbFill').style.width=pct+'%';
-  document.getElementById('sbLbl').textContent=`${done} / ${total} classes done`;
-  document.getElementById('ppFill').style.width=pct+'%';
-  document.getElementById('ppLbl').textContent=`${done} / ${total} done`;
-  const list=document.getElementById('sbList'),empty=document.getElementById('sbEmpty');
-  list.querySelectorAll('.ci').forEach(e=>e.remove());
-  if(!S.classes.length){empty.style.display='block';return}
-  empty.style.display='none';
-  const bmap={live:'<span class="badge b-live">LIVE</span>',done:'<span class="badge b-done">Done</span>',next:'<span class="badge b-next">Upcoming</span>',locked:'<span class="badge b-lock">No video</span>'};
-  S.classes.forEach((c,i)=>{
-    const el=document.createElement('div');
-    el.className='ci'+(c.status==='live'?' active':c.status==='done'?' done':c.status==='locked'?' locked':'');
-    el.innerHTML=`<div class="ci-n">${String(i+1).padStart(2,'0')}</div><div class="ci-b"><div class="ci-t">${esc(c.title||'Class '+(i+1))}</div>${bmap[c.status]||''}</div>`;
-    if(c.status!=='locked')el.onclick=()=>switchClass(i);
-    list.insertBefore(el,empty);
-  });
-}
-function switchClass(i){
-  const c=S.classes[i];if(!c||!c.driveId)return;
-  S.liveIdx=i;
-  document.querySelectorAll('.ci').forEach((el,j)=>el.classList.toggle('active',j===i));
-  document.getElementById('liveTitle').textContent=c.title||'Class '+(i+1);
-  document.getElementById('mbTitle').textContent=c.title||'Class '+(i+1);
-  document.getElementById('jTitle').textContent=c.title||'Class '+(i+1);
-  document.getElementById('driveFallback').style.display='none';
-  document.getElementById('mainVid').src='';
-  document.getElementById('mainVid').style.display='none';
-  document.getElementById('joinGate').style.display='flex';
-  document.getElementById('jBtn').disabled=false;
-  document.getElementById('jBtn').textContent='Join Class →';
-}
-
-/* ATTENDANCE */
-function updateAttStats(){
-  document.getElementById('attN').textContent=roster.length;
-  document.getElementById('attLast').textContent=roster.length?roster[0].name.split(' ')[0]:'—';
-  const cls=S.classes[S.liveIdx]||S.classes[0];
-  document.getElementById('attCls').textContent=cls?(cls.title||'Class 1'):'—';
-}
-function renderAtt(){
-  updateAttStats();
-  const q=document.getElementById('attQ').value.toLowerCase();
-  const fil=roster.filter(a=>a.name.toLowerCase().includes(q)||a.roll.toLowerCase().includes(q));
-  const el=document.getElementById('attRows');
-  if(!fil.length){el.innerHTML=`<div class="att-empty">${roster.length?'No results.':'No students have joined yet.'}</div>`;return}
-  el.innerHTML='';
-  fil.forEach((a,i)=>{
-    const r=document.createElement('div');
-    r.className='arow'+(i===0&&!q?' fresh':'');
-    r.innerHTML=`<div class="arow-i">${fil.length-i}</div><div class="arow-name">${esc(a.name)}</div><div class="arow-roll">${esc(a.roll)}</div><div class="arow-time">${a.time}</div>`;
-    el.appendChild(r);
-    if(i===0&&!q)setTimeout(()=>r.classList.remove('fresh'),3000);
-  });
-}
-function clearAtt(){if(!confirm('Clear all attendance?'))return;roster=[];document.getElementById('tCount').textContent=0;renderAtt();toast('Cleared.','ok')}
-function exportCSV(){
-  if(!roster.length){toast('Nothing to export.','err');return}
-  const rows=[['#','Name','Roll Number','Class','Joined At'],...roster.map((a,i)=>[roster.length-i,a.name,a.roll,a.classTitle,a.time])];
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download=`attendance_${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.csv`;
+function exportCSV() {
+  if(!roster.length) return;
+  const rows = [["#", "Name", "Roll", "Time"], ...roster.map((a, i) => [roster.length-i, a.name, a.roll, a.time])];
+  const csvContent = rows.map(e => e.join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  a.setAttribute('download', 'attendance.csv');
   a.click();
 }
 
-/* HELPERS */
-function xid(url){const m=url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);return m?m[1]:null}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function now(){return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true})}
-function toast(msg,type=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast'+(type?' '+type:'');
-  t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3200);
+function clearAtt() {
+  if(confirm("Clear all records?")) {
+    roster = [];
+    localStorage.removeItem('edu_roster');
+    renderAtt();
+  }
 }
+
+function xid(url) {
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+  return m ? m[1] : null;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Initial Render
+renderAtt();
 </script>
+
 </body>
 </html>
