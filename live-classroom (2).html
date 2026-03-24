@@ -447,26 +447,24 @@ window.addEventListener('DOMContentLoaded',()=>{
 });
 
 /* JOIN */
-function doJoin(){
-  const name=document.getElementById('jName').value.trim();
-  const roll=document.getElementById('jRoll').value.trim();
-  const err=document.getElementById('jErr');
-  if(!name||!roll){err.style.display='block';return;}
-  err.style.display='none';
-  const btn=document.getElementById('jBtn');
-  btn.disabled=true; btn.textContent='Joining…';
-  const cls=S.classes[S.liveIdx]||S.classes[0]||{};
-  const entry={name,roll,classTitle:cls.title||'Class 1',time:now()};
-  roster.unshift(entry);
-  document.getElementById('tCount').textContent=roster.length;
-  document.getElementById('vcnt').textContent=roster.length;
-  if(S.scriptUrl){
-    fetch(S.scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)}).catch(()=>{});
-  }
-  const driveId = (S.classes[S.liveIdx]||S.classes[0]||{}).driveId || '14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG';
-  document.getElementById('joinGate').style.display='none';
-  showVideo(driveId);
-  toast('Welcome '+name+'! Enjoy the class.','ok');
+function doJoin() {
+    const name = document.getElementById('nameInput').value.trim();
+    const roll = document.getElementById('rollInput').value.trim();
+
+    if(!name || !roll) {
+        toast('Please enter Name and Roll Number', 'err');
+        return;
+    }
+
+    // HARDCODE YOUR TUESDAY VIDEO ID HERE
+    // Just replace 'YOUR_GOOGLE_DRIVE_ID' with the actual ID
+    const tuesdayVideoId = '1A2B3C4D5E6F7G8H9I0J'; 
+
+    // This starts the class automatically for the student
+    showVideo(tuesdayVideoId);
+    
+    // Log attendance (Existing logic)
+    logAttendance(name, roll);
 }
 
 function showVideo(driveId) {
