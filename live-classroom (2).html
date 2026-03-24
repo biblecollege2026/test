@@ -81,6 +81,28 @@ header{height:52px;display:flex;align-items:center;justify-content:space-between
   z-index: 11;
   transition: width 1s linear;
 }
+/* Bottom Shield: Hides Play/Pause, Seek Bar, and Time */
+.bottom-shield {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 55px; /* Adjust this until the bar is hidden */
+    background: var(--bg); /* Matches your dark theme */
+    z-index: 100;
+    cursor: default;
+}
+
+/* Top Shield: Hides Download and Pop-out icons */
+.top-shield {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px; /* Covers the top right corner */
+    height: 60px;
+    background: var(--bg);
+    z-index: 100;
+}
 
 /* MAIN */
 .main{display:flex;flex-direction:column;overflow:hidden}
@@ -448,18 +470,24 @@ function doJoin(){
 }
 
 function showVideo(driveId) {
-  const vid = document.getElementById('mainVid');
-  
-  // Adding autoplay=1 and mute=0 to the URL
-  vid.src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1&mute=0`;
-  vid.style.display = 'block';
+    const wrap = document.getElementById('videoWrap');
+    const vid = document.getElementById('mainVid');
 
-  // Add the shield dynamically to block the seek bar
-  const shield = document.createElement('div');
-  shield.className = 'video-controls-shield';
-  document.getElementById('videoWrap').appendChild(shield);
+    // 1. Set the Source with Autoplay
+    vid.src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1`;
+    vid.style.display = 'block';
+
+    // 2. Create the Shields
+    const bShield = document.createElement('div');
+    bShield.className = 'bottom-shield';
+    
+    const tShield = document.createElement('div');
+    tShield.className = 'top-shield';
+
+    // 3. Add Shields to the Video Container
+    wrap.appendChild(bShield);
+    wrap.appendChild(tShield);
 }
-
 function showFallback(driveId){
   document.getElementById('mainVid').style.display='none';
   const fb=document.getElementById('driveFallback');
