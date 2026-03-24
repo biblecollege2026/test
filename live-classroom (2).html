@@ -448,23 +448,62 @@ window.addEventListener('DOMContentLoaded',()=>{
 
 /* JOIN */
 function doJoin() {
-    const name = document.getElementById('nameInput').value.trim();
-    const roll = document.getElementById('rollInput').value.trim();
+  const name = document.getElementById('jName').value.trim();
+  const roll = document.getElementById('jRoll').value.trim();
+  const err = document.getElementById('jErr');
 
-    if(!name || !roll) {
-        toast('Please enter Name and Roll Number', 'err');
-        return;
-    }
+  if (!name || !roll) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
 
-    // HARDCODE YOUR TUESDAY VIDEO ID HERE
-    // Just replace 'YOUR_GOOGLE_DRIVE_ID' with the actual ID
-    const tuesdayVideoId = '1A2B3C4D5E6F7G8H9I0J'; 
+  const btn = document.getElementById('jBtn');
+  btn.disabled = true;
+  btn.textContent = 'Joining Live Class...';
 
-    // This starts the class automatically for the student
-    showVideo(tuesdayVideoId);
-    
-    // Log attendance (Existing logic)
-    logAttendance(name, roll);
+  // 1. YOUR TUESDAY VIDEO ID (extracted from your link)
+  const driveId = "14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG";
+
+  // 2. Log Attendance (Same as your original system)
+  const entry = {
+    name,
+    roll,
+    classTitle: "Tuesday Live Session",
+    time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+  };
+  roster.unshift(entry);
+  localStorage.setItem('edu_roster', JSON.stringify(roster));
+
+  // 3. Switch to Video View
+  document.getElementById('joinGate').style.display = 'none';
+  
+  // 4. Start the Video Automatically
+  showVideo(driveId);
+  
+  toast('Welcome ' + name + '! The live session has started.', 'ok');
+}
+
+function showVideo(driveId) {
+  const vid = document.getElementById('mainVid');
+  const wrap = document.getElementById('videoWrap');
+
+  // Force autoplay and hide related files
+  vid.src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1&mute=0`;
+  vid.style.display = 'block';
+
+  // CREATE THE LIVE SHIELD (Hides the 0:01 / 2:03:12 bar)
+  const shield = document.createElement('div');
+  shield.style.position = 'absolute';
+  shield.style.bottom = '0';
+  shield.style.left = '0';
+  shield.style.width = '100%';
+  shield.style.height = '50px'; // Covers the Google Drive seek bar
+  shield.style.background = 'transparent'; 
+  shield.style.zIndex = '100';
+  shield.style.cursor = 'default';
+  
+  wrap.appendChild(shield);
 }
 
 function showVideo(driveId) {
