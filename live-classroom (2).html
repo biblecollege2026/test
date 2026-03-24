@@ -6,109 +6,92 @@
 <title>EduLive — Live Classroom</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* --- ORIGINAL STYLING PRESERVED --- */
+/* --- FULL ORIGINAL STYLING --- */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0b0d12;--s1:#12151e;--s2:#181c28;--s3:#1e2335;
-  --text:#e4e8f4;--muted:#6e7896;--accent:#4f82ff;
-  --red:#ff4f4f;--green:#3cd381;
+  --b0:rgba(255,255,255,0.05);--text:#e4e8f4;--muted:#6e7896;
+  --accent:#4f82ff;--red:#ff4f4f;--green:#3cd381;
 }
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.6;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+.container{max-width:1000px;margin:0 auto;padding:2rem}
 
-/* --- ADDED LIVE CLASSROOM STYLING --- */
+/* --- LIVE PLAYER COMPONENTS --- */
 .video-wrapper {
   position: relative;
   width: 100%;
-  max-width: 1000px;
-  margin: 2rem auto;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 1px solid var(--b0);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+  margin-bottom: 2rem;
 }
-.live-indicator {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  background: var(--red);
-  color: #fff;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 12px;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  animation: pulse 1.5s infinite;
+.live-tag {
+  position: absolute; top: 20px; left: 20px; z-index: 10;
+  background: var(--red); color: #fff; padding: 4px 12px;
+  border-radius: 4px; font-weight: 700; font-size: 12px;
+  display: flex; align-items: center; gap: 6px; animation: pulse 1.5s infinite;
 }
-@keyframes pulse { 0%{opacity:1} 50%{opacity:0.5} 100%{opacity:1} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
-.no-skip-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 50px; /* Covers Google Drive seek bar */
-  background: transparent;
-  z-index: 9;
+/* Prevents seeking on the Google Drive player bar */
+.no-click-shield {
+  position: absolute; bottom: 0; left: 0; width: 100%; height: 55px;
+  background: transparent; z-index: 9; cursor: default;
 }
 
 iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
 
+/* --- ORIGINAL UI ELEMENTS --- */
+.card{background:var(--s1);border:1px solid var(--b0);border-radius:20px;padding:2.5rem}
+.input-group{margin-bottom:1.5rem}
+label{display:block;margin-bottom:0.6rem;color:var(--muted);font-size:0.85rem;font-weight:500}
+input{width:100%;padding:1rem;background:var(--s2);border:1px solid var(--s3);border-radius:10px;color:var(--text);font-family:inherit;transition:0.2s}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(79,130,255,0.1)}
+.btn{width:100%;padding:1rem;background:var(--accent);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:1rem}
 .hidden { display: none !important; }
 
-/* --- ORIGINAL ATTENDANCE & UI COMPONENTS --- */
-.container{max-width:1100px;margin:0 auto;padding:2rem}
-.card{background:var(--s1);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:2rem}
-.input-group{margin-bottom:1.5rem}
-label{display:block;margin-bottom:0.5rem;color:var(--muted);font-size:0.9rem}
-input{width:100%;padding:0.8rem 1rem;background:var(--s2);border:1px solid var(--s3);border-radius:8px;color:var(--text);font-family:inherit}
-button{background:var(--accent);color:#fff;border:none;padding:0.8rem 1.5rem;border-radius:8px;font-weight:600;cursor:pointer;transition:0.2s}
-button:hover{filter:brightness(1.1)}
-
-#attendance-log { margin-top: 3rem; background: var(--s1); border-radius: 16px; padding: 1.5rem; }
-.log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.log-row { display: grid; grid-template-columns: 50px 1fr 1fr 120px; padding: 0.8rem; border-bottom: 1px solid var(--s3); font-size: 0.9rem; }
+/* Attendance Log Styling */
+#log-body { background: var(--s1); border-radius: 16px; overflow: hidden; border: 1px solid var(--b0); }
+.log-row { display: grid; grid-template-columns: 60px 1fr 1fr 120px; padding: 1rem; border-bottom: 1px solid var(--s3); align-items: center; }
 </style>
 </head>
 <body>
 
 <div class="container">
   <div id="join-view" class="card">
-    <h1 style="margin-bottom:1.5rem">Join Live Class</h1>
+    <h2 style="margin-bottom:2rem">Join Today's Class</h2>
     <div class="input-group">
       <label>Full Name</label>
-      <input type="text" id="nameInput" placeholder="Enter your name">
+      <input type="text" id="nameInput" placeholder="Enter Name">
     </div>
     <div class="input-group">
       <label>Roll Number</label>
-      <input type="text" id="rollInput" placeholder="Enter your roll number">
+      <input type="text" id="rollInput" placeholder="Enter Roll No.">
     </div>
     <div class="input-group">
-      <label>Class Video ID (Internal)</label>
-      <input type="text" id="vidInput" placeholder="Paste Google Drive Link">
+      <label>Google Drive Class Link</label>
+      <input type="text" id="vidInput" placeholder="https://drive.google.com/file/d/14azNwCY1GbaOKN9I2cLlgB7SxztYHsmG/view?usp=drive_link">
     </div>
-    <button onclick="playLive()">Enter Classroom</button>
+    <button class="btn" onclick="playLive()">Start Class</button>
   </div>
 
   <div id="class-view" class="hidden">
     <div class="video-wrapper">
-      <div class="live-indicator">● LIVE</div>
-      <div class="no-skip-overlay"></div>
-      <iframe id="vPlayer" src="" allow="autoplay"></iframe>
+      <div class="live-tag">● LIVE</div>
+      <div class="no-click-shield"></div>
+      <iframe id="vPlayer" allow="autoplay"></iframe>
     </div>
-    
-    <div id="attendance-log">
-      <div class="log-header">
-        <h3>Class Attendance (<span id="tCount">0</span>)</h3>
-        <div>
-          <button onclick="exportCSV()" style="background:var(--s3); font-size:0.8rem">Export CSV</button>
-          <button onclick="clearAtt()" style="background:var(--red); font-size:0.8rem">Clear</button>
-        </div>
+
+    <div id="log-body">
+      <div class="log-row" style="background:var(--s2); font-weight:600; color:var(--muted)">
+        <span>#</span><span>Student</span><span>Roll</span><span>Joined</span>
       </div>
-      <div id="log-body">
-        </div>
+      <div id="rows-container"></div>
+    </div>
+    <div style="margin-top:1.5rem; display:flex; gap:10px">
+        <button onclick="exportCSV()" style="background:var(--s3); padding:8px 16px; border-radius:6px; color:white; border:none; cursor:pointer">Download Attendance</button>
     </div>
   </div>
 </div>
@@ -117,85 +100,48 @@ button:hover{filter:brightness(1.1)}
 let roster = JSON.parse(localStorage.getItem('edu_roster')) || [];
 
 function playLive() {
-  const name = document.getElementById('nameInput').value.trim();
-  const roll = document.getElementById('rollInput').value.trim();
-  const vid = document.getElementById('vidInput').value.trim();
+  const n = document.getElementById('nameInput').value.trim();
+  const r = document.getElementById('rollInput').value.trim();
+  const link = document.getElementById('vidInput').value.trim();
 
-  if(!name || !roll || !vid) {
-    alert("Please fill all details.");
-    return;
-  }
+  if(!n || !r || !link) { alert("Missing details!"); return; }
 
-  const driveId = xid(vid);
-  if(!driveId) {
-    alert("Invalid Google Drive Link.");
-    return;
-  }
+  // GOOGLE DRIVE LINK EXTRACTION
+  const fileId = xid(link);
+  if(!fileId) { alert("Please provide a valid Google Drive Link"); return; }
 
-  // 1. Start Video
-  document.getElementById('vPlayer').src = `https://drive.google.com/file/d/${driveId}/preview?autoplay=1`;
-  
-  // 2. Log Attendance
-  const entry = {
-    name,
-    roll,
-    time: new Date().toLocaleTimeString('en-IN'),
-    date: new Date().toLocaleDateString('en-IN')
-  };
-  roster.unshift(entry);
+  // Set Iframe Source
+  const player = document.getElementById('vPlayer');
+  player.src = `https://drive.google.com/file/d/${fileId}/preview?autoplay=1`;
+
+  // Original Logic: Log Attendance
+  const log = { name: n, roll: r, time: new Date().toLocaleTimeString('en-IN'), date: new Date().toLocaleDateString('en-IN') };
+  roster.unshift(log);
   localStorage.setItem('edu_roster', JSON.stringify(roster));
-  
-  // 3. Switch View
+
+  // Toggle View
   document.getElementById('join-view').classList.add('hidden');
   document.getElementById('class-view').classList.remove('hidden');
-  renderAtt();
+  renderList();
 }
 
-function renderAtt() {
-  const body = document.getElementById('log-body');
-  document.getElementById('tCount').textContent = roster.length;
-  body.innerHTML = roster.map((a, i) => `
+function renderList() {
+  const container = document.getElementById('rows-container');
+  container.innerHTML = roster.map((item, index) => `
     <div class="log-row">
-      <span>${roster.length - i}</span>
-      <strong>${esc(a.name)}</strong>
-      <span>${esc(a.roll)}</span>
-      <span style="color:var(--muted)">${a.time}</span>
+      <span style="color:var(--muted)">${roster.length - index}</span>
+      <strong>${esc(item.name)}</strong>
+      <span>${esc(item.roll)}</span>
+      <span style="font-family:'DM Mono'">${item.time}</span>
     </div>
   `).join('');
 }
 
 function exportCSV() {
-  if(!roster.length) return;
-  const rows = [["#", "Name", "Roll", "Time"], ...roster.map((a, i) => [roster.length-i, a.name, a.roll, a.time])];
-  const csvContent = rows.map(e => e.join(",")).join("\n");
-  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const head = ["#", "Student Name", "Roll Number", "Join Time", "Date"];
+  const body = roster.map((a, i) => [roster.length - i, a.name, a.roll, a.time, a.date]);
+  const content = [head, ...body].map(row => row.join(",")).join("\n");
+  const blob = new Blob([content], { type: 'text/csv' });
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.setAttribute('href', url);
-  a.setAttribute('download', 'attendance.csv');
-  a.click();
-}
-
-function clearAtt() {
-  if(confirm("Clear all records?")) {
-    roster = [];
-    localStorage.removeItem('edu_roster');
-    renderAtt();
-  }
-}
-
-function xid(url) {
-  const m = url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
-  return m ? m[1] : null;
-}
-
-function esc(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// Initial Render
-renderAtt();
-</script>
-
-</body>
-</html>
+  a.href = url;
