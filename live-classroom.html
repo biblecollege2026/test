@@ -379,78 +379,33 @@ function doJoin(){
 }
 
 // ─── SHOW VIDEO ───
+// ─── SHOW VIDEO ───
 function showVideo(id){
-  if (!id){ showFallback(); return; }
-
-  const vid    = document.getElementById('mainVid');
-  const top    = document.getElementById('topBlock');
-  const bottom = document.getElementById('bottomBlock');
-  const shield = document.getElementById('shield');
-  const hint   = document.getElementById('playHint');
-
-  // Drive /preview embed
-  vid.src = 'https://drive.google.com/video/d/' + id + '/preview';
-  vid.style.display = 'block';
-
-  // Show top/bottom blockers to hide Drive's chrome bars
-  top.style.display    = 'block';
-  bottom.style.display = 'block';
-
-  // Show play hint overlay — clicking this passes click to iframe
-  hint.style.display = 'flex';
-
-  // Shield starts OFF so the iframe can receive the first play click
-  shield.style.display = 'none';
-
-  // When student clicks the hint overlay:
-  // 1. Hide the hint
-  // 2. Pass a simulated click to the iframe center to trigger play
-  // 3. After 1.5s activate the shield to block all further interaction
-  hint.addEventListener('click', function onFirstClick(){
-    hint.removeEventListener('click', onFirstClick);
-    hint.style.display = 'none';
-
-    // Simulate a click in the center of the iframe to trigger Drive's play
-    const rect = vid.getBoundingClientRect();
-    const cx = rect.left + rect.width  / 2;
-    const cy = rect.top  + rect.height / 2;
-    const clickEvent = new MouseEvent('click', {
-      bubbles: true, cancelable: true,
-      clientX: cx, clientY: cy, view: window
-    });
-    vid.dispatchEvent(clickEvent);
-
-    // Small delay then lock the shield so no more clicking
-    setTimeout(()=>{
-      shield.style.display = 'block';
-    }, 1500);
-  }, {once: true});
-
-  // After 6s, check if Drive blocked the embed
-  setTimeout(()=>{
-    try{
-      const doc = vid.contentDocument;
-      if (doc && doc.body && doc.body.innerHTML.length < 300) showFallback();
-    } catch(e){}
-  }, 6000);
+  // We go straight to the fallback because Google is blocking the embed
+  showFallback();
 }
 
 function showFallback(){
+  // 1. Hide all video elements and blockers
   document.getElementById('mainVid').style.display      = 'none';
   document.getElementById('topBlock').style.display     = 'none';
   document.getElementById('bottomBlock').style.display  = 'none';
   document.getElementById('shield').style.display       = 'none';
+  document.getElementById('playHint').style.display     = 'none';
+  
+  // 2. Prepare the secure access area
   const fb = document.getElementById('driveFallback');
+  
+  // 3. Update the button to use the 'view' link (never blocked)
   document.getElementById('driveDirectLink').href = 'https://drive.google.com/file/d/' + driveId + '/view';
+  
+  // 4. Update the text to be professional for the College
+  fb.querySelector('div:first-child').textContent = "Lesson is Ready";
+  fb.querySelector('div:nth-child(2)').textContent = "Attendance recorded. Click the button below to start your class.";
+  document.getElementById('driveDirectLink').textContent = "▶ Click to Start Lesson";
+  
   fb.style.display = 'flex';
 }
-
-// Block keyboard seeking
-document.addEventListener('keydown', e => {
-  if ([' ','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','f','F','m','M'].includes(e.key))
-    e.preventDefault();
-});
-
 function toast(msg, type=''){
   const t = document.getElementById('toast');
   t.textContent = msg;
