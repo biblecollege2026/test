@@ -93,8 +93,25 @@ header{height:48px;display:flex;align-items:center;justify-content:space-between
 #topBlock{display:none;position:absolute;top:0;left:0;right:0;height:44px;background:#000;z-index:9;pointer-events:all}
 #bottomBlock{display:none;position:absolute;bottom:0;left:0;right:0;height:60px;background:#000;z-index:9;pointer-events:all}
 
-/* Invisible shield over entire video — blocks mouse interaction */
-#shield{display:none;position:absolute;inset:0;z-index:8;background:transparent}
+/* Full shield — activated AFTER first play click, blocks all seeking */
+#shield{display:none;position:absolute;inset:0;z-index:11;background:transparent;cursor:default}
+
+/* Play hint — shown after join, student clicks once to start video */
+#playHint{
+  display:none;position:absolute;inset:0;z-index:12;
+  flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:rgba(0,0,0,0.5);cursor:pointer;
+}
+#playHint.visible{display:flex}
+#playHint:hover .play-btn{transform:scale(1.1);background:rgba(79,130,255,0.95)}
+.play-btn{
+  width:76px;height:76px;border-radius:50%;
+  background:rgba(79,130,255,0.8);
+  border:2px solid rgba(255,255,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .2s,background .2s;
+}
+.play-label{font-size:15px;font-weight:500;color:rgba(255,255,255,0.9);letter-spacing:.3px}
 
 /* META BAR */
 .meta-bar{background:var(--s1);border-top:1px solid var(--b0);padding:10px 20px;display:flex;align-items:center;gap:18px;flex-shrink:0}
@@ -192,13 +209,21 @@ header{height:48px;display:flex;align-items:center;justify-content:space-between
       <div id="topBlock"></div>
       <div id="bottomBlock"></div>
       <!-- Invisible mouse shield so seeking is blocked -->
+      <!-- Full shield — active AFTER first play click to block seeking -->
       <div id="shield" oncontextmenu="return false"></div>
+
+      <!-- Play hint — student must click once to start the video -->
+      <div id="playHint">
+        <div class="play-btn">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="play-label">Tap to start class</div>
+      </div>
 
       <!-- The video iframe, injected after join -->
       <iframe id="mainVid" src="" allowfullscreen
         allow="autoplay; encrypted-media; picture-in-picture"
         style="display:none;width:100%;height:100%;border:none;
-               /* Pull iframe up to hide Drive's top bar, down to hide bottom bar */
                margin-top:-44px; height:calc(100% + 104px); margin-bottom:-60px;">
       </iframe>
 
@@ -357,23 +382,57 @@ function doJoin(){
 function showVideo(id){
   if (!id){ showFallback(); return; }
 
-  const vid = document.getElementById('mainVid');
-  // Use Drive /preview embed — most reliable for all file sizes
+  const vid    = document.getElementById('mainVid');
+  const top    = document.getElementById('topBlock');
+  const bottom = document.getElementById('bottomBlock');
+  const shield = document.getElementById('shield');
+  const hint   = document.getElementById('playHint');
+
+  // Drive /preview embed
   vid.src = 'https://drive.google.com/file/d/' + id + '/preview';
   vid.style.display = 'block';
 
-  // Show blockers that cover Drive's control bar
-  document.getElementById('topBlock').style.display    = 'block';
-  document.getElementById('bottomBlock').style.display = 'block';
-  document.getElementById('shield').style.display      = 'block';
+  // Show top/bottom blockers to hide Drive's chrome bars
+  top.style.display    = 'block';
+  bottom.style.display = 'block';
 
-  // After 5s, check if Drive blocked the embed
+  // Show play hint overlay — clicking this passes click to iframe
+  hint.style.display = 'flex';
+
+  // Shield starts OFF so the iframe can receive the first play click
+  shield.style.display = 'none';
+
+  // When student clicks the hint overlay:
+  // 1. Hide the hint
+  // 2. Pass a simulated click to the iframe center to trigger play
+  // 3. After 1.5s activate the shield to block all further interaction
+  hint.addEventListener('click', function onFirstClick(){
+    hint.removeEventListener('click', onFirstClick);
+    hint.style.display = 'none';
+
+    // Simulate a click in the center of the iframe to trigger Drive's play
+    const rect = vid.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2;
+    const cy = rect.top  + rect.height / 2;
+    const clickEvent = new MouseEvent('click', {
+      bubbles: true, cancelable: true,
+      clientX: cx, clientY: cy, view: window
+    });
+    vid.dispatchEvent(clickEvent);
+
+    // Small delay then lock the shield so no more clicking
+    setTimeout(()=>{
+      shield.style.display = 'block';
+    }, 1500);
+  }, {once: true});
+
+  // After 6s, check if Drive blocked the embed
   setTimeout(()=>{
     try{
       const doc = vid.contentDocument;
       if (doc && doc.body && doc.body.innerHTML.length < 300) showFallback();
     } catch(e){}
-  }, 5000);
+  }, 6000);
 }
 
 function showFallback(){
