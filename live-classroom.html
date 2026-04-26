@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bible College — Live Class</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d12;--s1:#12151e;--s2:#181c28;--s3:#1e2335;
+  --b0:rgba(255,255,255,0.05);--b1:rgba(255,255,255,0.09);--b2:rgba(255,255,255,0.15);
+  --text:#e4e8f4;--muted:#6e7896;--dim:#4a5168;
+  --accent:#4f82ff;--accent-d:rgba(79,130,255,0.18);--accent-t:rgba(79,130,255,0.08);
+  --red:#ff3a54;--red-d:rgba(255,58,84,0.18);
+  --green:#1fd47a;--green-d:rgba(31,212,122,0.15);
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* HEADER */
+header{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--s1);border-bottom:1px solid var(--b0);flex-shrink:0;z-index:50}
+.logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;letter-spacing:-.3px}
+.logo-ring{width:26px;height:26px;border-radius:50%;background:var(--accent-d);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.hdr-course{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.hdr-course span{color:var(--text)}
+
+/* LAYOUT */
+.layout{flex:1;display:grid;grid-template-columns:270px 1fr;overflow:hidden;height:calc(100vh - 48px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--s1);border-right:1px solid var(--b0);display:flex;flex-direction:column;overflow:hidden}
+.sb-header{padding:14px 16px 12px;border-bottom:1px solid var(--b0);flex-shrink:0}
+.sb-course{font-size:13px;font-weight:600;line-height:1.3}
+.sb-instr{font-size:11px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:6px}
+.sb-instr::before{content:'';width:5px;height:5px;background:var(--green);border-radius:50%;flex-shrink:0;animation:gblink 2s infinite}
+@keyframes gblink{0%,100%{box-shadow:0 0 0 0 rgba(31,212,122,.5)}50%{box-shadow:0 0 0 3px transparent}}
+.sb-prog{margin-top:10px;height:3px;background:var(--b0);border-radius:2px;overflow:hidden}
+.sb-prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .6s}
+.sb-prog-label{font-size:10px;color:var(--dim);font-family:var(--mono);margin-top:4px}
+.sb-list{overflow-y:auto;flex:1;padding:6px 0}
+.sb-list::-webkit-scrollbar{width:3px}
+.sb-list::-webkit-scrollbar-thumb{background:var(--b1);border-radius:2px}
+.ci{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;transition:.15s;border-left:2px solid transparent}
+.ci.active{background:var(--accent-t);border-left-color:var(--accent)}
+.ci.done{opacity:.7}
+.ci-n{font-size:10px;font-family:var(--mono);color:var(--dim);min-width:20px;margin-top:2px}
+.ci.active .ci-n{color:var(--accent)}
+.ci.done .ci-n{color:var(--green)}
+.ci-b{flex:1;min-width:0}
+.ci-t{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci.active .ci-t{color:#fff}
+.badge{font-size:9px;font-weight:600;letter-spacing:.5px;padding:2px 6px;border-radius:3px;display:inline-block;margin-top:3px}
+.b-live{background:var(--red-d);color:var(--red);animation:blk 1.5s infinite}
+@keyframes blk{0%,100%{opacity:1}50%{opacity:.6}}
+.b-done{background:var(--green-d);color:var(--green)}
+.b-next{background:var(--accent-d);color:var(--accent)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.video-wrap{flex:1;position:relative;background:#000;overflow:hidden}
+.video-wrap iframe{width:100%;height:100%;border:none;display:block}
+
+/* LIVE OVERLAY BADGES */
+.live-bar{position:absolute;top:14px;left:14px;display:flex;align-items:center;gap:8px;z-index:10;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:6px 12px}
+.ld{width:6px;height:6px;background:var(--red);border-radius:50%;animation:blk 1.2s infinite;flex-shrink:0}
+.ll{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#fff}
+.lsep{width:1px;height:12px;background:rgba(255,255,255,.15)}
+.lt{font-size:12px;color:rgba(255,255,255,.75);max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.viewer-bar{position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:6px;z-index:10;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:6px 12px;font-size:12px;font-family:var(--mono);color:rgba(255,255,255,.7)}
+.vd{width:5px;height:5px;background:var(--green);border-radius:50%;animation:blk 1.8s infinite}
+
+/* JOIN GATE */
+.join-gate{position:absolute;inset:0;z-index:20;background:radial-gradient(ellipse at center,#131826 0%,#0b0d12 80%);display:flex;align-items:center;justify-content:center}
+.join-card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:32px;width:360px;max-width:92vw}
+.live-pill{display:inline-flex;align-items:center;gap:6px;background:var(--red-d);border:1px solid rgba(255,58,84,.25);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--red);margin-bottom:18px}
+.live-pill::before{content:'';width:5px;height:5px;background:var(--red);border-radius:50%;animation:blk 1.2s infinite}
+.join-card h2{font-size:18px;font-weight:600;margin-bottom:6px}
+.join-card p{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6}
+.jfield{margin-bottom:13px}
+.jfield label{display:block;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:5px}
+.jfield input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border .2s}
+.jfield input:focus{border-color:var(--accent)}
+.jfield input::placeholder{color:var(--dim)}
+.join-btn{width:100%;background:var(--accent);border:none;border-radius:9px;padding:12px;color:#fff;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:.15s;margin-top:4px}
+.join-btn:hover{background:#3d70f0}
+.join-btn:active{transform:scale(.98)}
+.join-btn:disabled{opacity:.5;cursor:not-allowed}
+.join-err{font-size:12px;color:var(--red);margin-top:8px;display:none}
+
+/* DRIVE CONTROL BLOCKERS — paint black bars over Drive's chrome */
+#topBlock{display:none;position:absolute;top:0;left:0;right:0;height:44px;background:#000;z-index:9;pointer-events:all}
+#bottomBlock{display:none;position:absolute;bottom:0;left:0;right:0;height:60px;background:#000;z-index:9;pointer-events:all}
+
+/* Invisible shield over entire video — blocks mouse interaction */
+#shield{display:none;position:absolute;inset:0;z-index:8;background:transparent}
+
+/* META BAR */
+.meta-bar{background:var(--s1);border-top:1px solid var(--b0);padding:10px 20px;display:flex;align-items:center;gap:18px;flex-shrink:0}
+.mb-item{display:flex;flex-direction:column;gap:2px}
+.mb-lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--dim)}
+.mb-val{font-size:13px;font-weight:500}
+.mb-sep{width:1px;height:26px;background:var(--b0)}
+.mb-spc{flex:1}
+.prog-pill{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--b0);border-radius:8px;padding:6px 14px}
+.pp-track{width:100px;height:4px;background:var(--b1);border-radius:2px;overflow:hidden}
+.pp-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s}
+.pp-lbl{font-size:11px;font-family:var(--mono);color:var(--muted)}
+
+/* FALLBACK */
+#driveFallback{display:none;position:absolute;inset:0;z-index:5;background:#0b0d12;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px;text-align:center}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s3);border:1px solid var(--b2);border-radius:9px;padding:10px 16px;font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{border-color:rgba(31,212,122,.5);color:var(--green)}
+.toast.err{border-color:rgba(255,58,84,.5);color:var(--red)}
+
+/* MOBILE */
+@media(max-width:640px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-ring">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="#4f82ff"><path d="M8 1L10.5 6H15L11 9.5L12.5 15L8 12L3.5 15L5 9.5L1 6H5.5Z"/></svg>
+    </div>
+    <span id="hdrName">Bible College</span>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-course">Course: <span id="hdrCourse">Loading…</span></div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR: class list -->
+  <div class="sidebar">
+    <div class="sb-header">
+      <div class="sb-course" id="sbCourse">Loading…</div>
+      <div class="sb-instr" id="sbInstr">Instructor</div>
+      <div class="sb-prog"><div class="sb-prog-fill" id="sbFill" style="width:0%"></div></div>
+      <div class="sb-prog-label" id="sbLbl">Loading classes…</div>
+    </div>
+    <div class="sb-list" id="sbList">
+      <div style="padding:20px 14px;font-size:12px;color:var(--dim)">Loading schedule…</div>
+    </div>
+  </div>
+
+  <!-- MAIN: video -->
+  <div class="main">
+    <div class="video-wrap" id="videoWrap">
+
+      <div class="live-bar">
+        <div class="ld"></div>
+        <div class="ll">Live</div>
+        <div class="lsep"></div>
+        <div class="lt" id="liveTitle">Class</div>
+      </div>
+
+      <div class="viewer-bar">
+        <div class="vd"></div>
+        <span id="vcnt">1</span>&nbsp;watching
+      </div>
+
+      <!-- JOIN GATE — shown first -->
+      <div class="join-gate" id="joinGate">
+        <div class="join-card">
+          <div class="live-pill">● Live now</div>
+          <h2 id="jTitle">Live Class</h2>
+          <p id="jSub">Enter your details to join the class.</p>
+          <div class="jfield">
+            <label>Full Name</label>
+            <input type="text" id="jName" placeholder="e.g. Rahul Sharma" maxlength="60"
+              onkeydown="if(event.key==='Enter')doJoin()">
+          </div>
+          <div class="jfield">
+            <label>Roll Number</label>
+            <input type="text" id="jRoll" placeholder="e.g. BC2024001" maxlength="30"
+              onkeydown="if(event.key==='Enter')doJoin()">
+          </div>
+          <button class="join-btn" id="jBtn" onclick="doJoin()">Join Class →</button>
+          <div class="join-err" id="jErr">Please fill in both fields.</div>
+        </div>
+      </div>
+
+      <!-- Blockers that paint over Drive's control bar -->
+      <div id="topBlock"></div>
+      <div id="bottomBlock"></div>
+      <!-- Invisible mouse shield so seeking is blocked -->
+      <div id="shield" oncontextmenu="return false"></div>
+
+      <!-- The video iframe, injected after join -->
+      <iframe id="mainVid" src="" allowfullscreen
+        allow="autoplay; encrypted-media; picture-in-picture"
+        style="display:none;width:100%;height:100%;border:none;
+               /* Pull iframe up to hide Drive's top bar, down to hide bottom bar */
+               margin-top:-44px; height:calc(100% + 104px); margin-bottom:-60px;">
+      </iframe>
+
+      <!-- Fallback if Drive blocks embed -->
+      <div id="driveFallback">
+        <div style="font-size:16px;font-weight:600">Video cannot load in this window</div>
+        <div style="font-size:13px;color:var(--muted);max-width:340px;line-height:1.7">
+          Google Drive is blocking the preview. Click below to watch directly.
+        </div>
+        <a id="driveDirectLink" href="#" target="_blank" rel="noopener"
+          style="background:var(--accent);color:#fff;padding:12px 28px;border-radius:9px;font-size:14px;font-weight:600;text-decoration:none">
+          ▶ Watch on Google Drive
+        </a>
+      </div>
+
+    </div><!-- end video-wrap -->
+
+    <div class="meta-bar">
+      <div class="mb-item"><div class="mb-lbl">Now Streaming</div><div class="mb-val" id="mbTitle">—</div></div>
+      <div class="mb-sep"></div>
+      <div class="mb-item"><div class="mb-lbl">Instructor</div><div class="mb-val" id="mbInstr">—</div></div>
+      <div class="mb-sep"></div>
+      <div class="mb-item"><div class="mb-lbl">Course</div><div class="mb-val" id="mbCourse">—</div></div>
+      <div class="mb-spc"></div>
+      <div class="prog-pill">
+        <div class="pp-track"><div class="pp-fill" id="ppFill" style="width:0%"></div></div>
+        <div class="pp-lbl" id="ppLbl">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// READ CONFIG FROM URL PARAMETERS
+// Apps Script sends:  ?id=DRIVE_FILE_ID&title=Class+Title&course=Bible+College
+//                     &instructor=Pastor+Name&classnum=3&total=10
+//                     &script=APPS_SCRIPT_URL
+// ─────────────────────────────────────────────
+const params     = new URLSearchParams(location.search);
+const driveId    = params.get('id')         || '';
+const classTitle = params.get('title')      || 'Live Class';
+const courseName = params.get('course')     || 'Bible College';
+const instructor = params.get('instructor') || 'Instructor';
+const classNum   = parseInt(params.get('classnum') || '1', 10);
+const totalClass = parseInt(params.get('total')    || '1', 10);
+const scriptUrl  = params.get('script')     || '';  // Apps Script attendance URL
+
+// Fake viewer count
+let roster = [];
+function fakeViewers(){
+  const n = Math.max(1, roster.length) + Math.floor(Math.random()*4);
+  document.getElementById('vcnt').textContent = n;
+}
+
+// ─── INIT ───
+window.addEventListener('DOMContentLoaded', () => {
+  // Populate UI from URL params
+  document.getElementById('hdrCourse').textContent  = courseName;
+  document.getElementById('sbCourse').textContent   = courseName;
+  document.getElementById('sbInstr').textContent    = instructor;
+  document.getElementById('mbInstr').textContent    = instructor;
+  document.getElementById('mbCourse').textContent   = courseName;
+  document.getElementById('liveTitle').textContent  = classTitle;
+  document.getElementById('mbTitle').textContent    = classTitle;
+  document.getElementById('jTitle').textContent     = classTitle;
+  document.getElementById('jSub').textContent       = courseName + ' — ' + instructor;
+
+  // Progress
+  const pct = Math.round((classNum - 1) / totalClass * 100);
+  document.getElementById('sbFill').style.width  = pct + '%';
+  document.getElementById('ppFill').style.width  = pct + '%';
+  document.getElementById('sbLbl').textContent   = (classNum-1) + ' / ' + totalClass + ' classes done';
+  document.getElementById('ppLbl').textContent   = (classNum-1) + ' / ' + totalClass + ' done';
+
+  // Build sidebar class list
+  buildSidebar();
+
+  // Viewer counter pulse
+  setInterval(fakeViewers, 5000);
+
+  // If no driveId in URL, show error on gate
+  if (!driveId) {
+    document.getElementById('jErr').textContent = 'No video ID provided. Please use the WhatsApp link.';
+    document.getElementById('jErr').style.display = 'block';
+    document.getElementById('jBtn').disabled = true;
+  }
+});
+
+// ─── SIDEBAR ───
+function buildSidebar(){
+  const list = document.getElementById('sbList');
+  list.innerHTML = '';
+  const bmap = {
+    done : '<span class="badge b-done">Done</span>',
+    live : '<span class="badge b-live">LIVE</span>',
+    next : '<span class="badge b-next">Upcoming</span>'
+  };
+  for (let i = 1; i <= totalClass; i++){
+    const status = i < classNum ? 'done' : i === classNum ? 'live' : 'next';
+    const el = document.createElement('div');
+    el.className = 'ci' + (status==='live'?' active':status==='done'?' done':'');
+    el.innerHTML = `
+      <div class="ci-n">${String(i).padStart(2,'0')}</div>
+      <div class="ci-b">
+        <div class="ci-t">${status==='live' ? classTitle : 'Class '+i}</div>
+        ${bmap[status]}
+      </div>`;
+    list.appendChild(el);
+  }
+}
+
+// ─── JOIN ───
+function doJoin(){
+  const name = document.getElementById('jName').value.trim();
+  const roll = document.getElementById('jRoll').value.trim();
+  const err  = document.getElementById('jErr');
+
+  if (!name || !roll){ err.style.display='block'; err.textContent='Please fill in both fields.'; return; }
+  err.style.display = 'none';
+
+  const btn = document.getElementById('jBtn');
+  btn.disabled = true;
+  btn.textContent = 'Joining…';
+
+  const entry = {
+    name       : name,
+    roll       : roll,
+    classTitle : classTitle,
+    classNum   : classNum,
+    course     : courseName,
+    time       : new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true})
+  };
+  roster.unshift(entry);
+  document.getElementById('vcnt').textContent = roster.length;
+
+  // ── Send attendance to Apps Script (Google Sheet) ──
+  if (scriptUrl) {
+    fetch(scriptUrl, {
+      method  : 'POST',
+      mode    : 'no-cors',
+      headers : {'Content-Type':'application/json'},
+      body    : JSON.stringify(entry)
+    }).catch(()=>{});
+  }
+
+  // Hide gate, show video
+  document.getElementById('joinGate').style.display = 'none';
+  showVideo(driveId);
+  toast('Welcome ' + name + '! Class is live.', 'ok');
+}
+
+// ─── SHOW VIDEO ───
+function showVideo(id){
+  if (!id){ showFallback(); return; }
+
+  const vid = document.getElementById('mainVid');
+  // Use Drive /preview embed — most reliable for all file sizes
+  vid.src = 'https://drive.google.com/file/d/' + id + '/preview';
+  vid.style.display = 'block';
+
+  // Show blockers that cover Drive's control bar
+  document.getElementById('topBlock').style.display    = 'block';
+  document.getElementById('bottomBlock').style.display = 'block';
+  document.getElementById('shield').style.display      = 'block';
+
+  // After 5s, check if Drive blocked the embed
+  setTimeout(()=>{
+    try{
+      const doc = vid.contentDocument;
+      if (doc && doc.body && doc.body.innerHTML.length < 300) showFallback();
+    } catch(e){}
+  }, 5000);
+}
+
+function showFallback(){
+  document.getElementById('mainVid').style.display      = 'none';
+  document.getElementById('topBlock').style.display     = 'none';
+  document.getElementById('bottomBlock').style.display  = 'none';
+  document.getElementById('shield').style.display       = 'none';
+  const fb = document.getElementById('driveFallback');
+  document.getElementById('driveDirectLink').href = 'https://drive.google.com/file/d/' + driveId + '/view';
+  fb.style.display = 'flex';
+}
+
+// Block keyboard seeking
+document.addEventListener('keydown', e => {
+  if ([' ','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','f','F','m','M'].includes(e.key))
+    e.preventDefault();
+});
+
+function toast(msg, type=''){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(()=> t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
