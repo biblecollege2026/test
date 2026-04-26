@@ -421,16 +421,10 @@ vid.style.display = 'block';
   }, {once: true});
 
   // Safety check: If it still blocks, then we show the fallback
-  setTimeout(()=>{
-    try{
-      if (!vid.contentWindow || vid.contentWindow.length === 0) {
-         showFallback();
-      }
-    } catch(e){
-      // If we can't even check the window, it's definitely blocked
-      console.log("CSP Block detected.");
-    }
-  }, 5000);
+ // ADD this instead
+vid.onerror = function() {
+  showFallback();
+  };
 }
 function showFallback(){
   document.getElementById('mainVid').style.display      = 'none';
