@@ -221,11 +221,11 @@ header{height:48px;display:flex;align-items:center;justify-content:space-between
       </div>
 
       <!-- The video iframe, injected after join -->
-      <iframe id="mainVid" src="" allowfullscreen
-        allow="autoplay; encrypted-media; picture-in-picture"
-        style="display:none;width:100%;height:100%;border:none;
-               margin-top:-44px; height:calc(100% + 104px); margin-bottom:-60px;">
-      </iframe>
+     <video id="mainVid" 
+  controlsList="nodownload noplaybackrate nofullscreen"
+  disablePictureInPicture playsinline
+  style="display:none;width:100%;height:100%;object-fit:contain;background:#000">
+       </video>
 
       <!-- Fallback if Drive blocks embed -->
       <div id="driveFallback">
@@ -390,8 +390,8 @@ function showVideo(id){
 
   
   // This helps bypass the 403 error while keeping it inside the website
-  vid.src = 'https://drive.google.com/file/d/' + id + '/preview';
-  vid.style.display = 'block';
+ vid.src = 'https://drive.google.com/uc?id=' + id + '&export=download&confirm=t';
+vid.style.display = 'block';
 
   // These keep the "Live" look by hiding the Drive titles and buttons
   top.style.display    = 'block';
