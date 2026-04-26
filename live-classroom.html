@@ -415,27 +415,15 @@ function showVideo(id){
     hint.removeEventListener('click', onFirstClick);
     hint.style.display = 'none';
 
-    const isAndroid = /android/i.test(navigator.userAgent);
+    const rect = vid.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2;
+    const cy = rect.top  + rect.height / 2;
+    const clickEvent = new MouseEvent('click', {
+      bubbles: true, cancelable: true,
+      clientX: cx, clientY: cy, view: window
+    });
+    vid.dispatchEvent(clickEvent);
 
-    if (isAndroid) {
-      // Android — open directly, iframe won't autoplay
-      vid.src = 'https://drive.google.com/file/d/' + id + '/preview';
-      vid.style.display = 'block';
-      window.open('https://drive.google.com/file/d/' + id + '/view', '_blank');
-      toast('Opening video in Drive...', '');
-    } else {
-      // Desktop — original logic, untouched
-      const rect = vid.getBoundingClientRect();
-      const cx = rect.left + rect.width  / 2;
-      const cy = rect.top  + rect.height / 2;
-      const clickEvent = new MouseEvent('click', {
-        bubbles: true, cancelable: true,
-        clientX: cx, clientY: cy, view: window
-      });
-      vid.dispatchEvent(clickEvent);
-    }
-
-    // Shield applies to both
     setTimeout(()=>{
       shield.style.display = 'block';
     }, 150000);
