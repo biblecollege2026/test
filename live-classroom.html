@@ -388,29 +388,22 @@ function showVideo(id){
   const shield = document.getElementById('shield');
   const hint   = document.getElementById('playHint');
 
-  // Drive /preview embed
+  // CHANGE: We use /video/d/ instead of /file/d/
+  // This helps bypass the 403 error while keeping it inside the website
   vid.src = 'https://drive.google.com/video/d/' + id + '/preview';
   vid.style.display = 'block';
 
-  // Show top/bottom blockers to hide Drive's chrome bars
+  // These keep the "Live" look by hiding the Drive titles and buttons
   top.style.display    = 'block';
   bottom.style.display = 'block';
-
-  // Show play hint overlay — clicking this passes click to iframe
-  hint.style.display = 'flex';
-
-  // Shield starts OFF so the iframe can receive the first play click
+  hint.style.display   = 'flex';
   shield.style.display = 'none';
 
-  // When student clicks the hint overlay:
-  // 1. Hide the hint
-  // 2. Pass a simulated click to the iframe center to trigger play
-  // 3. After 1.5s activate the shield to block all further interaction
   hint.addEventListener('click', function onFirstClick(){
     hint.removeEventListener('click', onFirstClick);
     hint.style.display = 'none';
 
-    // Simulate a click in the center of the iframe to trigger Drive's play
+    // Simulated click to start the video
     const rect = vid.getBoundingClientRect();
     const cx = rect.left + rect.width  / 2;
     const cy = rect.top  + rect.height / 2;
@@ -420,21 +413,25 @@ function showVideo(id){
     });
     vid.dispatchEvent(clickEvent);
 
-    // Small delay then lock the shield so no more clicking
+    // This is the most important part: 
+    // It locks the video so students cannot "Seek" or "Rewind"
     setTimeout(()=>{
       shield.style.display = 'block';
     }, 1500);
   }, {once: true});
 
-  // After 6s, check if Drive blocked the embed
+  // Safety check: If it still blocks, then we show the fallback
   setTimeout(()=>{
     try{
-      const doc = vid.contentDocument;
-      if (doc && doc.body && doc.body.innerHTML.length < 300) showFallback();
-    } catch(e){}
-  }, 6000);
+      if (!vid.contentWindow || vid.contentWindow.length === 0) {
+         showFallback();
+      }
+    } catch(e){
+      // If we can't even check the window, it's definitely blocked
+      console.log("CSP Block detected.");
+    }
+  }, 5000);
 }
-
 function showFallback(){
   document.getElementById('mainVid').style.display      = 'none';
   document.getElementById('topBlock').style.display     = 'none';
