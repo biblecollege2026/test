@@ -221,11 +221,16 @@ header{height:48px;display:flex;align-items:center;justify-content:space-between
       </div>
 
       <!-- The video iframe, injected after join -->
-      <iframe id="mainVid" src="" allowfullscreen
-        allow="autoplay; encrypted-media; picture-in-picture"
-        style="display:none;width:100%;height:100%;border:none;
-               margin-top:-44px; height:calc(100% + 104px); margin-bottom:-60px;">
-      </iframe>
+     <iframe id="mainVid" src="" 
+  allowfullscreen
+  allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+  mozallowfullscreen
+  webkitallowfullscreen
+  playsinline
+  webkit-playsinline
+  style="display:none;width:100%;height:100%;border:none;
+         margin-top:-44px; height:calc(100% + 104px); margin-bottom:-60px;">
+</iframe>
 
       <!-- Fallback if Drive blocks embed -->
       <div id="driveFallback">
@@ -406,24 +411,35 @@ function showVideo(id){
   // 1. Hide the hint
   // 2. Pass a simulated click to the iframe center to trigger play
   // 3. After 1.5s activate the shield to block all further interaction
-  hint.addEventListener('click', function onFirstClick(){
+ hint.addEventListener('click', function onFirstClick(){
     hint.removeEventListener('click', onFirstClick);
     hint.style.display = 'none';
 
-    // Simulate a click in the center of the iframe to trigger Drive's play
-    const rect = vid.getBoundingClientRect();
-    const cx = rect.left + rect.width  / 2;
-    const cy = rect.top  + rect.height / 2;
-    const clickEvent = new MouseEvent('click', {
-      bubbles: true, cancelable: true,
-      clientX: cx, clientY: cy, view: window
-    });
-    vid.dispatchEvent(clickEvent);
+    const isAndroid = /android/i.test(navigator.userAgent);
 
-    // Small delay then lock the shield so no more clicking
+    if (isAndroid) {
+      // Android — open directly, iframe won't autoplay
+      vid.src = 'https://drive.google.com/file/d/' + id + '/preview';
+      vid.style.display = 'block';
+      window.open('https://drive.google.com/file/d/' + id + '/view', '_blank');
+      toast('Opening video in Drive...', '');
+    } else {
+      // Desktop — original logic, untouched
+      const rect = vid.getBoundingClientRect();
+      const cx = rect.left + rect.width  / 2;
+      const cy = rect.top  + rect.height / 2;
+      const clickEvent = new MouseEvent('click', {
+        bubbles: true, cancelable: true,
+        clientX: cx, clientY: cy, view: window
+      });
+      vid.dispatchEvent(clickEvent);
+    }
+
+    // Shield applies to both
     setTimeout(()=>{
       shield.style.display = 'block';
     }, 150000);
+
   }, {once: true});
 
   // After 6s, check if Drive blocked the embed
