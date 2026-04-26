@@ -221,11 +221,11 @@ header{height:48px;display:flex;align-items:center;justify-content:space-between
       </div>
 
       <!-- The video iframe, injected after join -->
-     <video id="mainVid" 
-  controlsList="nodownload noplaybackrate nofullscreen"
-  disablePictureInPicture playsinline
-  style="display:none;width:100%;height:100%;object-fit:contain;background:#000">
-       </video>
+      <iframe id="mainVid" src="" allowfullscreen
+        allow="autoplay; encrypted-media; picture-in-picture"
+        style="display:none;width:100%;height:100%;border:none;
+               margin-top:-44px; height:calc(100% + 104px); margin-bottom:-60px;">
+      </iframe>
 
       <!-- Fallback if Drive blocks embed -->
       <div id="driveFallback">
@@ -388,22 +388,29 @@ function showVideo(id){
   const shield = document.getElementById('shield');
   const hint   = document.getElementById('playHint');
 
-  
-  // This helps bypass the 403 error while keeping it inside the website
- vid.src = 'https://drive.google.com/uc?id=' + id + '&export=download&confirm=t';
-vid.style.display = 'block';
+  // Drive /preview embed
+  vid.src = 'https://drive.google.com/file/d/' + id + '/preview';
+  vid.style.display = 'block';
 
-  // These keep the "Live" look by hiding the Drive titles and buttons
+  // Show top/bottom blockers to hide Drive's chrome bars
   top.style.display    = 'block';
   bottom.style.display = 'block';
-  hint.style.display   = 'flex';
+
+  // Show play hint overlay — clicking this passes click to iframe
+  hint.style.display = 'flex';
+
+  // Shield starts OFF so the iframe can receive the first play click
   shield.style.display = 'none';
 
+  // When student clicks the hint overlay:
+  // 1. Hide the hint
+  // 2. Pass a simulated click to the iframe center to trigger play
+  // 3. After 1.5s activate the shield to block all further interaction
   hint.addEventListener('click', function onFirstClick(){
     hint.removeEventListener('click', onFirstClick);
     hint.style.display = 'none';
 
-    // Simulated click to start the video
+    // Simulate a click in the center of the iframe to trigger Drive's play
     const rect = vid.getBoundingClientRect();
     const cx = rect.left + rect.width  / 2;
     const cy = rect.top  + rect.height / 2;
@@ -413,19 +420,21 @@ vid.style.display = 'block';
     });
     vid.dispatchEvent(clickEvent);
 
-    // This is the most important part: 
-    // It locks the video so students cannot "Seek" or "Rewind"
+    // Small delay then lock the shield so no more clicking
     setTimeout(()=>{
       shield.style.display = 'block';
     }, 1500);
   }, {once: true});
 
-  // Safety check: If it still blocks, then we show the fallback
- // ADD this instead
-vid.onerror = function() {
-  showFallback();
-  };
+  // After 6s, check if Drive blocked the embed
+  setTimeout(()=>{
+    try{
+      const doc = vid.contentDocument;
+      if (doc && doc.body && doc.body.innerHTML.length < 300) showFallback();
+    } catch(e){}
+  }, 6000);
 }
+
 function showFallback(){
   document.getElementById('mainVid').style.display      = 'none';
   document.getElementById('topBlock').style.display     = 'none';
@@ -441,7 +450,6 @@ document.addEventListener('keydown', e => {
   if ([' ','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','f','F','m','M'].includes(e.key))
     e.preventDefault();
 });
-
 
 function toast(msg, type=''){
   const t = document.getElementById('toast');
