@@ -388,9 +388,9 @@ function showVideo(id){
   const shield = document.getElementById('shield');
   const hint   = document.getElementById('playHint');
 
-  // CHANGE: We use /video/d/ instead of /file/d/
+  
   // This helps bypass the 403 error while keeping it inside the website
-  vid.src = 'https://drive.google.com/video/d/' + id + '/preview';
+  vid.src = 'https://drive.google.com/file/d/' + id + '/preview';
   vid.style.display = 'block';
 
   // These keep the "Live" look by hiding the Drive titles and buttons
