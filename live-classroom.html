@@ -225,15 +225,13 @@ header{height:48px;display:flex;align-items:center;justify-content:space-between
       </div>
 
       <!-- The video iframe, injected after join -->
-     <iframe id="mainVid" src="" 
+  <iframe id="mainVid" src="" 
   allowfullscreen
   allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-  mozallowfullscreen
-  webkitallowfullscreen
-  playsinline
-  webkit-playsinline
-  style="display:none;width:100%;height:100%;border:none;
-         margin-top:-44px; height:calc(100% + 104px); margin-bottom:-60px;">
+  mozallowfullscreen webkitallowfullscreen playsinline webkit-playsinline
+  style="display:none;width:100%;border:none;
+         position:absolute;top:-80px;left:0;right:0;
+         bottom:-200px;height:calc(100% + 280px);">
 </iframe>
 
       <!-- Fallback if Drive blocks embed -->
@@ -434,6 +432,7 @@ function showVideo(id){
 
   }, {once: true});
 
+}
   // After 6s, check if Drive blocked the embed
 
 
