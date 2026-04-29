@@ -435,13 +435,7 @@ function showVideo(id){
   }, {once: true});
 
   // After 6s, check if Drive blocked the embed
-  setTimeout(()=>{
-    try{
-      const doc = vid.contentDocument;
-      if (doc && doc.body && doc.body.innerHTML.length < 300) showFallback();
-    } catch(e){}
-  }, 6000);
-}
+
 
 function showFallback(){
   document.getElementById('mainVid').style.display      = 'none';
