@@ -142,6 +142,17 @@ header{height:48px;display:flex;align-items:center;justify-content:space-between
   .layout{grid-template-columns:1fr}
   .sidebar{display:none}
 }
+  #mainVid {
+  transform: scale(1.08);
+  transform-origin: center center;
+}
+
+@media(max-width:640px){
+  #mainVid {
+    transform: scale(1.12) translateY(-4%);
+    transform-origin: center center;
+  }
+}
 </style>
 </head>
 <body>
@@ -225,13 +236,11 @@ header{height:48px;display:flex;align-items:center;justify-content:space-between
       </div>
 
       <!-- The video iframe, injected after join -->
-  <iframe id="mainVid" src="" 
+<iframe id="mainVid" src="" 
   allowfullscreen
   allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
   mozallowfullscreen webkitallowfullscreen playsinline webkit-playsinline
-  style="display:none;width:100%;border:none;
-         position:absolute;top:-80px;left:0;right:0;
-         bottom:-200px;height:calc(100% + 280px);">
+  style="display:none;width:100%;height:100%;border:none;">
 </iframe>
 
       <!-- Fallback if Drive blocks embed -->
